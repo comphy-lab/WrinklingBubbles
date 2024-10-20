@@ -1,3 +1,20 @@
+@if _XOPEN_SOURCE < 700
+  @undef _XOPEN_SOURCE
+  @define _XOPEN_SOURCE 700
+@endif
+@if _GNU_SOURCE
+@include <stdint.h>
+@include <string.h>
+@include <fenv.h>
+@endif
+#define _CATCH
+#define dimension 2
+#define BGHOSTS 2
+#include "common.h"
+#include "grid/quadtree.h"
+#ifndef BASILISK_HEADER_0
+#define BASILISK_HEADER_0
+#line 1 "wrinkling_bub_axi_v1.c"
 /**
  * @file wrinkling_bub_axi_v1.c
  * @author Saumili Jana (vatsalsanjay@gmail.com)
@@ -81,8 +98,8 @@ event init(t = 0){
   if(!restore (file = "dump")){
     h = 1/k;
     refine((R2circle(x,y) < 1.05) && (level < MAXlevel));
-    foreach (){
-      if (((R2circle(x,y)-sq(1.-h))>0)&&(R2circle(x,y)-1.<0)){
+    for each (){
+      if (((R2circle-sq(1.-h))>0)&&(R2circle-1.<0)){
         f[] = 1;
       }
       else{
@@ -136,3 +153,4 @@ event logWriting (i++) {
   }
 
 }
+#endif
