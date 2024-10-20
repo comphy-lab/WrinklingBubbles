@@ -29,51 +29,62 @@
 Id2: indicates the surrounding gas/fluid(Newtonian)
 */
 #define Rho21 (10e-3)
+#define Mu21 (10e-2)
 
 
 //Boundary conditions
 //velocity //x-axis axisymmetric
 u.t[left] = dirichlet(0.0);
 u.n[left] = dirichlet(0.0);
-//contact angle?
+//contact angle? pessure inside bubble film
 
 
 //declarations
 int MAXlevel;
-double tmax, Oh1, Oh2, Bo, Ldomain, k;
+double tmax, Oh1, Bo, Ldomain, k, h;
 
 int main(int argc, char const *argv[]){
     //assignments
-MAXlevel = 10; //max possible grid res
-tmax = 1.0;
-Ldomain = 2;
+  MAXlevel = 10; //max possible grid res
+  tmax = 1.0;
+  Ldomain = 2;
 
-//Bo = 0; //gravity
-Oh1 = 10;//liq film Oh
-Oh2 = 1e-4;//surrunding Oh
-k = 10; //curvature R/h
-L0=Ldomain;
-X0=0.; Y0=0.;
-init_grid (1 << (4));
-char comm[80];
-sprintf (comm, "mkdir -p intermediate");
-system(comm);
+  Bo = 0; //gravity
+  Oh1 = 10;//liq film Oh
+  Oh2 = Mu21*;//surrunding Oh
+  k = 10; //curvature R/h
 
-rho1 = 1.0; 
-rho2 = Rho21;
+  fprintf(ferr, "Level %d, tmax %g, Bo %g, Oh1 %3.2e, Lo %g\n", MAXlevel, tmax, Bo, Oh1, Ldomain);
 
-//mu1 = Oh1/
+  L0=Ldomain;
+  X0=0.; Y0=0.;
+  init_grid (1 << (4));
+  char comm[80];
+  sprintf (comm, "mkdir -p intermediate");
+  system(comm);
 
-
-
-
-
-
-    run();
+  rho1 = 1.0; 
+  rho2 = Rho21;
+  f.sigma = 1;//coeff of surface tension
+  mu1 = Oh1;
+  mu2 = Mu21*Oh1;
+  G.x = -Bo; //gravity
+  run();
 }
 
 //Initial condition
+event init(t = 0){
+  if(!restore (file = "dump")){
+    h = 1/k;
 
+    //refine((R2Drop(x,y) < 1.05) && (level < MAXlevel));
+    //fraction (f, 1. - R2Drop(x,y));
+    foreach () {
+      u.x[] = -1.0*f[];
+      u.y[] = 0.0;
+    }
+  }
+}
 
 //AMR
 
