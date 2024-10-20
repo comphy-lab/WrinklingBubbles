@@ -13,6 +13,7 @@
 #include "navier-stokes/conserving.h"
 // #include "log-conform-ViscoElastic_v6.h" // VE part
 #include "tension.h"
+#include "reduced.h"//gravity
 
 // error tolerances //for AMR
 #define fErr (1e-3)
@@ -30,7 +31,11 @@ Id2: indicates the surrounding gas/fluid(Newtonian)
 */
 #define Rho21 (10e-3)
 #define Mu21 (10e-2)
+//Calculations
+#define Xcent (0.0)
+#define Ycent (0.0)
 
+#define R2circle(x,y) (sq(x - Xcent) + sq(y - Ycent))
 
 //Boundary conditions
 //velocity //x-axis axisymmetric
@@ -51,7 +56,7 @@ int main(int argc, char const *argv[]){
 
   Bo = 0; //gravity
   Oh1 = 10;//liq film Oh
-  Oh2 = Mu21*;//surrunding Oh
+
   k = 10; //curvature R/h
 
   fprintf(ferr, "Level %d, tmax %g, Bo %g, Oh1 %3.2e, Lo %g\n", MAXlevel, tmax, Bo, Oh1, Ldomain);
@@ -72,22 +77,53 @@ int main(int argc, char const *argv[]){
   run();
 }
 
-//Initial condition
+//Initial condition// 
 event init(t = 0){
   if(!restore (file = "dump")){
     h = 1/k;
-
-    //refine((R2Drop(x,y) < 1.05) && (level < MAXlevel));
-    //fraction (f, 1. - R2Drop(x,y));
-    foreach () {
-      u.x[] = -1.0*f[];
-      u.y[] = 0.0;
-    }
+    refine((R2circle(x,y) < 1.05) && (level < MAXlevel));
+    //fraction (f, (1. - R2circle(x,y)) && (R2circle(x,y)-sq(1.0-h)));
   }
 }
 
 //AMR
+scalar KAPPA[];
+event adapt(i++) {
+  curvature(f, KAPPA);
+  adapt_wavelet ((scalar *){f, u.x, u.y, KAPPA},
+    (double[]){fErr, VelErr, VelErr, KErr},
+    MAXlevel, MAXlevel-4);
+  //unrefine(x>150.0);
 
+}
 
 //Outpts
 //static
+event writingFiles (t = 0, t += tsnap; t <= tmax) {
+   p.nodump = false; // dump pressure also
+  dump (file = "dump");
+  char nameOut[80];
+  sprintf (nameOut, "intermediate/snapshot-%5.4f", t);
+  dump (file = nameOut);
+}
+
+event logWriting (i++) {
+
+  static FILE * fp;
+  if (pid() == 0){
+    if (i == 0) {
+      fprintf (ferr, "i dt t\n");
+      fp = fopen ("log", "w");
+      fprintf (fp, "Level %d, tmax %g, Oh %3.2e, Bo %2.1e, Lo %g\n", MAXlevel, tmax, Oh1, Bo, Ldomain);
+      fprintf (fp, "i dt t\n");
+      fprintf (fp, "%d %g %g \n", i, dt, t);
+      fclose(fp);
+    } else {
+      fp = fopen ("log", "a");
+      fprintf (fp, "%d %g %g\n", i, dt, t);
+      fclose(fp);
+    }
+    fprintf (ferr, "%d %g %g\n", i, dt, t);
+  }
+
+}
