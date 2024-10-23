@@ -79,16 +79,31 @@ int main(int argc, char const *argv[]){
 //Initial condition// 
 event init(t = 0){
   if(!restore (file = "dump")){
+    float y_p, x_p, x1, x2;
     h = 1/k;
+    y_p = 0.1;
+    x1 = sqrt(sq(1.0-h)-sq(y_p));
+    x2 = sqrt(1-sq(y_p));
+    x_p = (x1+x2)/2;
+
+
     refine((R2circle(x,y) < 1.05) && (level < MAXlevel));
     foreach (){
-      if (((R2circle(x,y)-sq(1.-h))>0)&&(R2circle(x,y)-1.<0)){
+      if ((((y >= y_p)&&(R2circle(x,y)-sq(1.-h))>0)&&(R2circle(x,y)-1.<0))||((y<y_p)&&(sq(x-x_p)+sq(y-y_p)-sq(h/2)<0))){
         f[] = 1;
       }
       else{
         f[] = 0;
       }
     }
+   /* foreach (){
+      if (((R2circle(x,y)-sq(1.-h))>0)&&(R2circle(x,y)-1.<0)){
+        f[] = 1;
+      }
+      else{
+        f[] = 0;
+      }
+    }*/
     f.prolongation = refine_bilinear;
     boundary((scalar *){f});
     //fraction (f, (1. - R2circle(x,y)) && (R2circle(x,y)-sq(1.0-h)));
@@ -97,7 +112,7 @@ event init(t = 0){
 
 //AMR
 scalar KAPPA[];
-event adapt(i++) {
+event adapt(i++){
   curvature(f, KAPPA);
   adapt_wavelet ((scalar *){f, u.x, u.y, KAPPA},
     (double[]){fErr, VelErr, VelErr, KErr},
