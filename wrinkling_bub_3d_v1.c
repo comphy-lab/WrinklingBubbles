@@ -1,6 +1,6 @@
 /**
  * @file wrinkling_bub_axi_v1.c
- * @author Saumili Jana (vatsalsanjay@gmail.com)
+ * @author Saumili Jana (jsaumili@gmail.com)
  * @date 18-10-2024
  * Newtonuian cases
 */
@@ -81,17 +81,21 @@ int main(int argc, char const *argv[]){
 //Initial condition// 
 event init(t = 0){
   if(!restore (file = "dump")){
-    float d_h, x_p, x1, x2;
+    float d_h, x_p, y_p, z_p, x1, x2;
     h = 1/k;
-    d_h = 0.1;//avg distance of hole//sqrt(y_p^)
+    d_h = 0.1;//avg distance of hole//sqrt(y_p^+z_p^2)
     x1 = sqrt(sq(1.0-h)-sq(d_h));
     x2 = sqrt(1-sq(d_h));
     x_p = (x1+x2)/2;
-
+   // y_p = 10; z_p; //initialise with arbitrary lage value
 
     refine((R2circle(x,y,z) < 1.05) && (level < MAXlevel));
+    
     foreach (){
-      if ((((y >= y_p)&&(R2circle(x,y,z)-sq(1.-h))>0)&&(R2circle(x,y,z)-1.<0))||((y<y_p)&&(sq(x-x_p)+sq(y-y_p)-sq(h/2)<0))){
+      theta = atan(z/y);
+      y_p = d_h*cos(theta);
+      z_p = d_h*sin(theta);
+      if ((((sq(y)+sq(z)>= sq(d_h))&&(R2circle(x,y,z)-sq(1.-h))>0)&&(R2circle(x,y,z)-1.<0))||((sq(y)+sq(z)<sq(d_h))&&(sq(x-x_p)+sq(y-y_p)+sq(z-z_p)-sq(h/2)<0))){
         f[] = 1;
       }
       else{

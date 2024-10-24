@@ -1,6 +1,6 @@
 /**
  * @file wrinkling_bub_axi_v1.c
- * @author Saumili Jana (vatsalsanjay@gmail.com)
+ * @author Saumili Jana (jsaumili@gmail.com)
  * @date 18-10-2024
  * Newtonuian cases
 */
