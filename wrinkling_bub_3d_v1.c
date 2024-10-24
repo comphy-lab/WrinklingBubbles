@@ -14,6 +14,7 @@
 // #include "log-conform-ViscoElastic_v6.h" // VE part
 #include "tension.h"
 #include "reduced.h"//gravity
+//#include "vtk.h"//paraview visualization
 
 // error tolerances //for AMR
 #define fErr (1e-3)
@@ -69,6 +70,10 @@ int main(int argc, char const *argv[]){
   sprintf (comm, "mkdir -p intermediate");
   system(comm);
 
+  char comm_vtk[80];
+  sprintf (comm_vtk, "mkdir -p intermediate_vtk");//for dumping vtk files//comment out when not using
+  system(comm_vtk);
+
   rho1 = 1.0; 
   rho2 = Rho21;
   f.sigma = 1;//coeff of surface tension
@@ -102,17 +107,9 @@ event init(t = 0){
         f[] = 0;
       }
     }
-    /*foreach (){
-      if (((R2circle(x,y,z)-sq(1.-h))>0)&&(R2circle(x,y,z)-1.<0)){
-        f[] = 1;
-      }
-      else{
-        f[] = 0;
-      }
-    }
+    
     f.prolongation = refine_bilinear;
-    boundary((scalar *){f});*/
-    //fraction (f, (1. - R2circle(x,y)) && (R2circle(x,y)-sq(1.0-h)));
+    boundary((scalar *){f});
   }
 }
 
@@ -135,6 +132,17 @@ event writingFiles (t = 0, t += tsnap; t <= tmax) {
   char nameOut[80];
   sprintf (nameOut, "intermediate/snapshot-%5.4f", t);
   dump (file = nameOut);
+
+  //vtk outputs, comment out block when not needed
+  /*char nameOut_vtk[80];
+  sprintf (nameOut_vtk, "intermediate_vtk/snapshot-%5.4f", t);
+  char tail[8] = ".vtk";
+  strcat(nameOut_vtk,tail);
+  FILE *fp=fopen(nameOut_vtk,"w");
+  bool linear=true;
+  int n=N;
+  output_vtk(all,n,fp,linear);
+  fclose(fp);*///vtkend
 }
 
 event logWriting (i++) {
