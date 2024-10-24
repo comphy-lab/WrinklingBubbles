@@ -81,7 +81,7 @@ int main(int argc, char const *argv[]){
 //Initial condition// 
 event init(t = 0){
   if(!restore (file = "dump")){
-    float d_h, x_p, y_p, z_p, x1, x2;
+    double d_h, x_p, y_p, z_p, x1, x2;
     h = 1/k;
     d_h = 0.1;//avg distance of hole//sqrt(y_p^+z_p^2)
     x1 = sqrt(sq(1.0-h)-sq(d_h));
@@ -91,7 +91,7 @@ event init(t = 0){
 
     refine((R2circle(x,y,z) < 1.05) && (level < MAXlevel));
     
-    foreach (){
+    foreach (reduction(+:theta), reduction(+:y_p), reduction(+:z_p)){
       theta = atan(z/y);
       y_p = d_h*cos(theta);
       z_p = d_h*sin(theta);
@@ -130,7 +130,7 @@ event adapt(i++){
 //Outpts
 //static
 event writingFiles (t = 0, t += tsnap; t <= tmax) {
-   p.nodump = false; // dump pressure also
+  p.nodump = false; // dump pressure also
   dump (file = "dump");
   char nameOut[80];
   sprintf (nameOut, "intermediate/snapshot-%5.4f", t);
