@@ -14,7 +14,8 @@
 // #include "log-conform-ViscoElastic_v6.h" // VE part
 #include "tension.h"
 #include "reduced.h"//gravity
-//#include "vtk.h"//paraview visualization
+
+#include "output_vtu_foreach.h"//paraview visualization
 
 // error tolerances //for AMR
 #define fErr (1e-3)
@@ -70,9 +71,9 @@ int main(int argc, char const *argv[]){
   sprintf (comm, "mkdir -p intermediate");
   system(comm);
 
-  /*char comm_vtk[80];
-  sprintf (comm_vtk, "mkdir -p intermediate_vtk");//for dumping vtk files//comment out when not using
-  system(comm_vtk);*/
+  char comm_vtu[80];
+  sprintf (comm_vtu, "mkdir -p intermediate_vtu");//for dumping vtu files//comment out when not using
+  system(comm_vtu);
 
   rho1 = 1.0; 
   rho2 = Rho21;
@@ -133,16 +134,11 @@ event writingFiles (t = 0, t += tsnap; t <= tmax) {
   sprintf (nameOut, "intermediate/snapshot-%5.4f", t);
   dump (file = nameOut);
 
-  //vtk outputs, comment out block when not needed
-  /*char nameOut_vtk[80];
-  sprintf (nameOut_vtk, "intermediate_vtk/snapshot-%5.4f", t);
-  char tail[8] = ".vtk";
-  strcat(nameOut_vtk,tail);
-  FILE *fp=fopen(nameOut_vtk,"w");
-  bool linear=true;
-  int n=N;
-  output_vtk(all,n,fp,linear);
-  fclose(fp);*///vtkend
+  //vtu outputs, comment out block when not needed
+  char nameOut_vtu[80];
+  sprintf (nameOut_vtu, "intermediate_vtu/snapshot-%5.4f", t);
+  output_vtu((scalar *) {f, p}, (vector *) {u}, nameOut_vtu);
+  //vtuend
 }
 
 event logWriting (i++) {
