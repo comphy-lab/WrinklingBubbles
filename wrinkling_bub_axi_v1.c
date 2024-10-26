@@ -53,10 +53,10 @@ int main(int argc, char const *argv[]){
   tmax = 3.0;
   Ldomain = 1.2;
 
-  Bo = atof(argv[1]); //gravity
-  Oh1 = atof(argv[2]);//liq film Oh
+  Bo = 0; //gravity
+  Oh1 = 10;//liq film Oh
 
-  k = atof(argv[3]);; //curvature R/h
+  k = 10; //curvature R/h
 
   fprintf(ferr, "Level %d, tmax %g, Bo %g, Oh1 %3.2e, Lo %g\n", MAXlevel, tmax, Bo, Oh1, Ldomain);
 

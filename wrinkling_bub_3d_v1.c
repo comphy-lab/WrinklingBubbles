@@ -54,7 +54,7 @@ int main(int argc, char const *argv[]){
     //assignments
   MAXlevel = 10; //max possible grid res
   tmax = 1.0;
-  Ldomain = 2;
+  Ldomain = 1.2;
 
   Bo = atof(argv[1]); //gravity
   Oh1 = atof(argv[2]);//liq film Oh
