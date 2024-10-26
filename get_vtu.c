@@ -18,7 +18,6 @@ int main(int a, char const *arguments[])
   u.r[left] = dirichlet(0.0);
   f.prolongation = fraction_refine;
   boundary(all);
-
   output_vtu((scalar *) {f, p}, (vector *) {u}, filename);
 
 
