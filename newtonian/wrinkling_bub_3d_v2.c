@@ -53,9 +53,9 @@ double tmax, Oh1, Bo, Ldomain, k, h;
 
 int main(int argc, char const *argv[]){
     //assignments
-  MAXlevel = 10; //max possible grid res
+  MAXlevel = 9; //max possible grid res
   tmax = 1.0;
-  Ldomain = 1.2;
+  Ldomain = 1.1;
 
   Bo = atof(argv[1]); //gravity
   Oh1 = atof(argv[2]);//liq film Oh
@@ -93,9 +93,8 @@ event init(t = 0){
     x1 = sqrt(sq(1.0-h)-sq(d_h));
     x2 = sqrt(1-sq(d_h));
     x_p = (x1+x2)/2;
-   // y_p = 10; z_p; //initialise with arbitrary lage value
 
-    refine((R2circle(x,y,z) < 1.05) && (level < MAXlevel));
+    refine((R2circle(x,y,z) < 1.1) &&(R2circle(x,y,z)>1.1*(1.-h))&& (level < MAXlevel));
     
     foreach (reduction(+:theta), reduction(+:y_p), reduction(+:z_p)){
       theta = atan(z/y);
