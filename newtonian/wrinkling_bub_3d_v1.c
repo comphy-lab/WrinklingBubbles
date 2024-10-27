@@ -95,7 +95,7 @@ event init(t = 0){
     x_p = (x1+x2)/2;
    // y_p = 10; z_p; //initialise with arbitrary lage value
 
-    refine((R2circle(x,y,z) < 1.05) && (level < MAXlevel));
+    refine((R2circle(x,y,z) < 1.1) && (R2circle(x,y,z)>0.9*(1.-h)) && (level < MAXlevel));
     
     foreach (reduction(+:theta), reduction(+:y_p), reduction(+:z_p)){
       theta = atan(z/y);

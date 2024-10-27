@@ -94,7 +94,7 @@ event init(t = 0){
     x2 = sqrt(1-sq(d_h));
     x_p = (x1+x2)/2;
 
-    refine((R2circle(x,y,z) < 1.1) &&(R2circle(x,y,z)>1.1*(1.-h))&& (level < MAXlevel));
+    refine((R2circle(x,y,z) < 1.1) && (R2circle(x,y,z)>0.9*(1.-h)) && (level < MAXlevel));
     
     foreach (reduction(+:theta), reduction(+:y_p), reduction(+:z_p)){
       theta = atan(z/y);
