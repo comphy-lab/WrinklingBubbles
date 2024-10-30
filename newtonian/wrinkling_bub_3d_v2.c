@@ -21,7 +21,7 @@
 #include "tension.h"
 #include "reduced.h"//gravity
 
-//#include "output_vtu_foreach.h"//paraview visualization
+#include "output_vtu_foreach.h"//paraview visualization
 
 // error tolerances //for AMR
 #define fErr (1e-3)
@@ -79,7 +79,7 @@ int main(int argc, char const *argv[]){
 
   char comm_vtu[80];
   sprintf (comm_vtu, "mkdir -p intermediate_vtu");//for dumping vtu files//comment out when not using
-
+  system(comm_vtu);
   rho1 = 1.0; rho2 = Rho21;
   f.sigma = 1;//coeff of surface tension
   mu1 = Oh1; mu2 = Mu21*Oh1;
@@ -142,9 +142,9 @@ event writingFiles (t = 0, t += tsnap; t <= tmax) {
   dump (file = nameOut);
 
   //vtu outputs, comment out block when not needed
-  //char nameOut_vtu[80];
-  //sprintf (nameOut_vtu, "intermediate_vtu/snapshot-%5.4f", t);
-  //output_vtu((scalar *) {f, p}, (vector *) {u}, nameOut_vtu);//vtuend
+  char nameOut_vtu[80];
+  sprintf (nameOut_vtu, "intermediate_vtu/snapshot-%5.4f", t);
+  output_vtu((scalar *) {f, p}, (vector *) {u}, nameOut_vtu);//vtuend
 }
 
 event logWriting (i++) {
