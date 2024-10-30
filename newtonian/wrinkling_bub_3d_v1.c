@@ -102,7 +102,7 @@ event init(t = 0){
     
     vertex scalar phi[];
     foreach_vertex(reduction(+:theta), reduction(+:y_p), reduction(+:z_p)){
-      double theta = atan(z/y);
+      theta = atan(z/y);
       y_p = d_h*cos(theta);
       z_p = d_h*sin(theta);
 
