@@ -2,7 +2,10 @@
  * @file wrinkling_bub_axi_v1.c
  * @author Saumili Jana (jsaumili@gmail.com)
  * @date 18-10-2024
- * Newtonuian cases
+ * Newtonian cases
+ * 
+ * Last update: Oct 30, 2024, Saumili
+ * changelog: fixed the initial condition for 3d. 
 */
 
 //f: 1 is liq, 0 is gas phase
@@ -37,14 +40,16 @@ Id2: indicates the surrounding gas/fluid(Newtonian)
 #define Ycent (0.0)
 #define Zcent (0.0)
 
-#define R2circle(x,y,z) (sq(x - Xcent) + sq(y - Ycent) + sq(z - Zcent))
+#define R3sphere(x,y,z) (sq(x - Xcent) + sq(y - Ycent) + sq(z - Zcent))
 
 //Boundary conditions
 //velocity //x-axis axisymmetric
 u.t[left] = dirichlet(0.0);
 u.n[left] = dirichlet(0.0);
 u.r[left] = dirichlet(0.0);
-//contact angle? pessure inside bubble film
+f[left] = neumann(0.0); // this sets the contact angle to 90 degrees.
+
+//pressure inside bubble film??
 
 //declarations
 int MAXlevel;
@@ -52,7 +57,7 @@ double tmax, Oh1, Bo, Ldomain, k, h;
 
 int main(int argc, char const *argv[]){
     //assignments
-  MAXlevel = 8; //max possible grid res
+  MAXlevel = 7; //max possible grid res
   tmax = 1.0;
   Ldomain = 1.2;
 
@@ -85,30 +90,35 @@ int main(int argc, char const *argv[]){
 //Initial condition// 
 event init(t = 0){
   if(!restore (file = "dump")){
-    double d_h, x_p, y_p, z_p, x1, x2;
+    double d_h, x_p, y_p, z_p, x1, x2, theta;
     h = 1/k;
     d_h = 0.1;//avg distance of hole//sqrt(y_p^+z_p^2)
     x1 = sqrt(sq(1.0-h)-sq(d_h));
     x2 = sqrt(1-sq(d_h));
     x_p = (x1+x2)/2;
-   // y_p = 10; z_p; //initialise with arbitrary lage value
 
-    refine((R2circle(x,y,z) < 1.05) && (R2circle(x,y,z)>sq(1.-h-0.05)) && (level < MAXlevel));
+    //refine((R3sphere(x,y,z) < 1.05) && (R3sphere(x,y,z)>sq(1.-h-0.05)) && (level < MAXlevel));
+    refine((R3sphere(x,y,z) < 1.05) && (level < MAXlevel));
     
-    foreach (reduction(+:theta), reduction(+:y_p), reduction(+:z_p)){
-      theta = atan(z/y);
+    vertex scalar phi[];
+    foreach_vertex(reduction(+:theta), reduction(+:y_p), reduction(+:z_p)){
+      double theta = atan(z/y);
       y_p = d_h*cos(theta);
       z_p = d_h*sin(theta);
-      if ((((sq(y)+sq(z)>= sq(d_h))&&(R2circle(x,y,z)-sq(1.-h))>0)&&(R2circle(x,y,z)-1.<0))||((sq(y)+sq(z)<sq(d_h))&&(sq(x-x_p)+sq(y-y_p)+sq(z-z_p)-sq(h/2)<0))){
-        f[] = 1;
+
+      if(sq(y)+sq(z) >= sq(d_h)){
+        double r = sqrt(sq(x) + sq(y) + sq(z));
+        double shell = min(1. - r, (r - (1. - h)));
+        phi[] = shell;
       }
-      else{
-        f[] = 0;
+     else {
+      phi[] = (sq(h/2.)-(sq(x-x_p)+sq(y-y_p)+sq(z-z_p)));
       }
+      
     }
-    
-    f.prolongation = refine_bilinear;
-    boundary((scalar *){f});
+    fractions (phi,f);  
+    //f.prolongation = refine_bilinear;
+    //boundary((scalar *){f});
   }
 }
 
@@ -119,8 +129,6 @@ event adapt(i++){
   adapt_wavelet ((scalar *){f, u.x, u.y, KAPPA},
     (double[]){fErr, VelErr, VelErr, KErr},
     MAXlevel, MAXlevel-4);
-  //unrefine(x>150.0);
-
 }
 
 //Outpts

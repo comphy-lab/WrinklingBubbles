@@ -1,7 +1,3 @@
-
-
-
-
 /**
  * @file wrinkling_bub_axi_v1.c
  * @author Saumili Jana (jsaumili@gmail.com)
@@ -10,6 +6,9 @@
  * 
  * Last update: Oct 28, 2024, Vatsal
  * changelog: fixed the initial condition. 
+ * 
+ * Last update: Oct 30, 2024, Saumili
+ * changelog: fixed the initial condition for 3d. 
 */
 
 //f: 1 is liq, 0 is gas phase
@@ -22,7 +21,7 @@
 #include "tension.h"
 #include "reduced.h"//gravity
 
-// #include "output_vtu_foreach.h"//paraview visualization
+//#include "output_vtu_foreach.h"//paraview visualization
 
 // error tolerances //for AMR
 #define fErr (1e-3)
@@ -64,10 +63,10 @@ int main(int argc, char const *argv[]){
   tmax = 1.0;
   Ldomain = 1.2;
 
-  Bo = 1e-3; //gravity
-  Oh1 = 1.0;//liq film Oh
+  Bo = atof(argv[1]); //gravity
+  Oh1 = atof(argv[2]);//liq film Oh
 
-  k = 10; //curvature R/h
+  k = atof(argv[3]); //curvature R/h
 
   fprintf(ferr, "Level %d, tmax %g, Bo %g, Oh1 %3.2e, Lo %g\n", MAXlevel, tmax, Bo, Oh1, Ldomain);
 
@@ -80,7 +79,6 @@ int main(int argc, char const *argv[]){
 
   char comm_vtu[80];
   sprintf (comm_vtu, "mkdir -p intermediate_vtu");//for dumping vtu files//comment out when not using
-  system(comm_vtu);
 
   rho1 = 1.0; rho2 = Rho21;
   f.sigma = 1;//coeff of surface tension
@@ -90,37 +88,39 @@ int main(int argc, char const *argv[]){
 }
 
 //Initial condition// 
-event init(t = 0) {
-  if (!restore (file = "dump")) {
-    float y_p, x_p, x1, x2;
+event init(t = 0){
+  if(!restore (file = "dump")){
+    double d_h, x_p, y_p, z_p, x1, x2, theta;
     h = 1/k;
-    y_p = 0.1;
-    x1 = sqrt(sq(1.0-h)-sq(y_p));
-    x2 = sqrt(1-sq(y_p));
+    d_h = 0.1;//avg distance of hole//sqrt(y_p^+z_p^2)
+    x1 = sqrt(sq(1.0-h)-sq(d_h));
+    x2 = sqrt(1-sq(d_h));
     x_p = (x1+x2)/2;
 
-
-    
     refine((R3sphere(x,y,z) < 1.05) && (level < MAXlevel));
     
     vertex scalar phi[];
-    foreach_vertex() {
-      if (y >= y_p) {
-        // Upper part - spherical shell
+    foreach_vertex(reduction(+:theta), reduction(+:y_p), reduction(+:z_p)){
+      double theta = atan(z/y);
+      y_p = d_h*cos(theta);
+      z_p = d_h*sin(theta);
+
+      if(sq(y)+sq(z) >= sq(d_h)){
         double r = sqrt(sq(x) + sq(y) + sq(z));
         double shell = min(1. - r, (r - (1. - h)));
         phi[] = shell;
       }
-      else {
-        // Lower part - toroidal rim
-        phi[] = (h/2. - sqrt(sq(y - y_p) + sq(sqrt(sq(x-x_p+1.)+sq(z-x_p+1.))-1)));
+     else {
+      phi[] = (sq(h/2.)-(sq(x-x_p)+sq(y-y_p)+sq(z-z_p)));
       }
+      
     }
-    fractions (phi, f);
-    dump (file = "dump");
-    return 1;
+    fractions (phi,f);  
+    //f.prolongation = refine_bilinear;
+    //boundary((scalar *){f});
   }
 }
+
 
 //AMR
 scalar KAPPA[];
@@ -142,10 +142,9 @@ event writingFiles (t = 0, t += tsnap; t <= tmax) {
   dump (file = nameOut);
 
   //vtu outputs, comment out block when not needed
-  // char nameOut_vtu[80];
-  // sprintf (nameOut_vtu, "intermediate_vtu/snapshot-%5.4f", t);
-  // output_vtu((scalar *) {f, p}, (vector *) {u}, nameOut_vtu);
-  //vtuend
+  //char nameOut_vtu[80];
+  //sprintf (nameOut_vtu, "intermediate_vtu/snapshot-%5.4f", t);
+  //output_vtu((scalar *) {f, p}, (vector *) {u}, nameOut_vtu);//vtuend
 }
 
 event logWriting (i++) {
