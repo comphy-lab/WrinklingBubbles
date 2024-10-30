@@ -1,8 +1,15 @@
+
+
+
+
 /**
  * @file wrinkling_bub_axi_v1.c
  * @author Saumili Jana (jsaumili@gmail.com)
  * @date 18-10-2024
- * Newtonuian cases
+ * Newtonian cases
+ * 
+ * Last update: Oct 28, 2024, Vatsal
+ * changelog: fixed the initial condition. 
 */
 
 //f: 1 is liq, 0 is gas phase
@@ -15,7 +22,7 @@
 #include "tension.h"
 #include "reduced.h"//gravity
 
-#include "output_vtu_foreach.h"//paraview visualization
+// #include "output_vtu_foreach.h"//paraview visualization
 
 // error tolerances //for AMR
 #define fErr (1e-3)
@@ -31,36 +38,36 @@
 /*Id1 :indicates the liquid film  media formimg the bubble
 Id2: indicates the surrounding gas/fluid(Newtonian)
 */
-#define Rho21 (10e-3)
-#define Mu21 (10e-2)
+#define Rho21 (1e-3)
+#define Mu21 (1e-2)
 //Calculations
 #define Xcent (0.0)
 #define Ycent (0.0)
 #define Zcent (0.0)
 
-#define R2circle(x,y,z) (sq(x - Xcent) + sq(y - Ycent) + sq(z - Zcent))
+#define R3sphere(x,y,z) (sq(x - Xcent) + sq(y - Ycent) + sq(z - Zcent))
 
 //Boundary conditions
 //velocity //x-axis axisymmetric
 u.t[left] = dirichlet(0.0);
 u.n[left] = dirichlet(0.0);
 u.r[left] = dirichlet(0.0);
-//contact angle? pessure inside bubble film
+f[left] = neumann(0.0); // this sets the contact angle to 90 degrees.
 
 //declarations
 int MAXlevel;
 double tmax, Oh1, Bo, Ldomain, k, h;
 
 int main(int argc, char const *argv[]){
-    //assignments
-  MAXlevel = 9; //max possible grid res
+  //assignments
+  MAXlevel = 7; //max possible grid res
   tmax = 1.0;
-  Ldomain = 1.1;
+  Ldomain = 1.2;
 
-  Bo = atof(argv[1]); //gravity
-  Oh1 = atof(argv[2]);//liq film Oh
+  Bo = 1e-3; //gravity
+  Oh1 = 1.0;//liq film Oh
 
-  k = atof(argv[3]); //curvature R/h
+  k = 10; //curvature R/h
 
   fprintf(ferr, "Level %d, tmax %g, Bo %g, Oh1 %3.2e, Lo %g\n", MAXlevel, tmax, Bo, Oh1, Ldomain);
 
@@ -75,41 +82,43 @@ int main(int argc, char const *argv[]){
   sprintf (comm_vtu, "mkdir -p intermediate_vtu");//for dumping vtu files//comment out when not using
   system(comm_vtu);
 
-  rho1 = 1.0; 
-  rho2 = Rho21;
+  rho1 = 1.0; rho2 = Rho21;
   f.sigma = 1;//coeff of surface tension
-  mu1 = Oh1;
-  mu2 = Mu21*Oh1;
+  mu1 = Oh1; mu2 = Mu21*Oh1;
   G.x = -Bo; //gravity
   run();
 }
 
 //Initial condition// 
-event init(t = 0){
-  if(!restore (file = "dump")){
-    double d_h, x_p, y_p, z_p, x1, x2;
+event init(t = 0) {
+  if (!restore (file = "dump")) {
+    float y_p, x_p, x1, x2;
     h = 1/k;
-    d_h = 0.1;//avg distance of hole//sqrt(y_p^+z_p^2)
-    x1 = sqrt(sq(1.0-h)-sq(d_h));
-    x2 = sqrt(1-sq(d_h));
+    y_p = 0.1;
+    x1 = sqrt(sq(1.0-h)-sq(y_p));
+    x2 = sqrt(1-sq(y_p));
     x_p = (x1+x2)/2;
 
-    refine((R2circle(x,y,z) < 1.05) && (R2circle(x,y,z)>sq(1.-h-0.05)) && (level < MAXlevel));    
+
     
-    foreach (reduction(+:theta), reduction(+:y_p), reduction(+:z_p)){
-      theta = atan(z/y);
-      y_p = d_h*cos(theta);
-      z_p = d_h*sin(theta);
-      if ((((sq(y)+sq(z)>= sq(d_h))&&(R2circle(x,y,z)-sq(1.-h))>0)&&(R2circle(x,y,z)-1.<0))||((sq(y)+sq(z)<sq(d_h))&&(sq(x-x_p)+sq(y-y_p)+sq(z-z_p)-sq(h/2)<0))){
-        f[] = 1;
+    refine((R3sphere(x,y,z) < 1.05) && (level < MAXlevel));
+    
+    vertex scalar phi[];
+    foreach_vertex() {
+      if (y >= y_p) {
+        // Upper part - spherical shell
+        double r = sqrt(sq(x) + sq(y) + sq(z));
+        double shell = min(1. - r, (r - (1. - h)));
+        phi[] = shell;
       }
-      else{
-        f[] = 0;
+      else {
+        // Lower part - toroidal rim
+        phi[] = (h/2. - sqrt(sq(y - y_p) + sq(sqrt(sq(x-x_p+1.)+sq(z-x_p+1.))-1)));
       }
     }
-    
-    f.prolongation = refine_bilinear;
-    boundary((scalar *){f});
+    fractions (phi, f);
+    dump (file = "dump");
+    return 1;
   }
 }
 
@@ -127,16 +136,15 @@ event adapt(i++){
 //Outpts
 //static
 event writingFiles (t = 0, t += tsnap; t <= tmax) {
-  p.nodump = false; // dump pressure also
   dump (file = "dump");
   char nameOut[80];
   sprintf (nameOut, "intermediate/snapshot-%5.4f", t);
   dump (file = nameOut);
 
   //vtu outputs, comment out block when not needed
-  char nameOut_vtu[80];
-  sprintf (nameOut_vtu, "intermediate_vtu/snapshot-%5.4f", t);
-  output_vtu((scalar *) {f, p}, (vector *) {u}, nameOut_vtu);
+  // char nameOut_vtu[80];
+  // sprintf (nameOut_vtu, "intermediate_vtu/snapshot-%5.4f", t);
+  // output_vtu((scalar *) {f, p}, (vector *) {u}, nameOut_vtu);
   //vtuend
 }
 

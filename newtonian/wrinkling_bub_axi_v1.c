@@ -2,7 +2,10 @@
  * @file wrinkling_bub_axi_v1.c
  * @author Saumili Jana (jsaumili@gmail.com)
  * @date 18-10-2024
- * Newtonuian cases
+ * Newtonian cases
+ * 
+ * Last update: Oct 28, 2024, Vatsal
+ * changelog: fixed the initial condition. 
 */
 
 //f: 1 is liq, 0 is gas phase
@@ -24,13 +27,12 @@
 
 //time-intervals for saving
 #define tsnap (0.01)  //snapshot saving interval
-#define tlog (0.001) //data logging interval
 
 /*Id1 :indicates the liquid film  media formimg the bubble
 Id2: indicates the surrounding gas/fluid(Newtonian)
 */
-#define Rho21 (10e-3)
-#define Mu21 (10e-2)
+#define Rho21 (1e-3)
+#define Mu21 (1e-2)
 //Calculations
 #define Xcent (0.0)
 #define Ycent (0.0)
@@ -41,20 +43,20 @@ Id2: indicates the surrounding gas/fluid(Newtonian)
 //velocity //x-axis axisymmetric
 u.t[left] = dirichlet(0.0);
 u.n[left] = dirichlet(0.0);
-//contact angle? pessure inside bubble film
+f[left] = neumann(0.0); // this sets the contact angle to 90 degrees.
 
 //declarations
 int MAXlevel;
 double tmax, Oh1, Bo, Ldomain, k, h;
 
 int main(int argc, char const *argv[]){
-    //assignments
-  MAXlevel = 10; //max possible grid res
-  tmax = 3.0;
+  //assignments
+  MAXlevel = 7; //max possible grid res
+  tmax = 1.0;
   Ldomain = 1.2;
 
-  Bo = 0; //gravity
-  Oh1 = 10;//liq film Oh
+  Bo = 1e-3; //gravity
+  Oh1 = 1.0;//liq film Oh
 
   k = 10; //curvature R/h
 
@@ -67,14 +69,13 @@ int main(int argc, char const *argv[]){
   sprintf (comm, "mkdir -p intermediate");
   system(comm);
 
-  rho1 = 1.0; 
-  rho2 = Rho21;
-  f.sigma = 1;//coeff of surface tension
-  mu1 = Oh1;
-  mu2 = Mu21*Oh1;
+  rho1 = 1.0; rho2 = Rho21;
+  f.sigma = 1; //coeff of surface tension
+  mu1 = Oh1; mu2 = Mu21*Oh1;
   G.x = -Bo; //gravity
   run();
 }
+
 
 //Initial condition// 
 event init(t = 0){
@@ -88,25 +89,22 @@ event init(t = 0){
 
 
     refine((R2circle(x,y) < 1.05) && (level < MAXlevel));
-    foreach (){
-      if ((((y >= y_p)&&(R2circle(x,y)-sq(1.-h))>0)&&(R2circle(x,y)-1.<0))||((y<y_p)&&(sq(x-x_p)+sq(y-y_p)-sq(h/2)<0))){
-        f[] = 1;
-      }
-      else{
-        f[] = 0;
+
+    vertex scalar phi[];
+    foreach_vertex() {
+      if (y >= y_p) {
+        // Upper part - spherical rim
+        double r = sqrt(sq(x) + sq(y));
+        double shell = min(1. - r, (r - (1. - h)));
+        phi[] = shell;
+      } 
+      else {
+        // Lower part - half circle
+        phi[] = (h/2 - sqrt(sq(x - x_p) + sq(y - y_p)));
       }
     }
-   /* foreach (){
-      if (((R2circle(x,y)-sq(1.-h))>0)&&(R2circle(x,y)-1.<0)){
-        f[] = 1;
-      }
-      else{
-        f[] = 0;
-      }
-    }*/
-    f.prolongation = refine_bilinear;
-    boundary((scalar *){f});
-    //fraction (f, (1. - R2circle(x,y)) && (R2circle(x,y)-sq(1.0-h)));
+    fractions (phi, f);
+
   }
 }
 
@@ -124,7 +122,6 @@ event adapt(i++){
 //Outpts
 //static
 event writingFiles (t = 0, t += tsnap; t <= tmax) {
-   p.nodump = false; // dump pressure also
   dump (file = "dump");
   char nameOut[80];
   sprintf (nameOut, "intermediate/snapshot-%5.4f", t);

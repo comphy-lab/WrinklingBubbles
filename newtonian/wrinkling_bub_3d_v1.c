@@ -30,8 +30,8 @@
 /*Id1 :indicates the liquid film  media formimg the bubble
 Id2: indicates the surrounding gas/fluid(Newtonian)
 */
-#define Rho21 (10e-3)
-#define Mu21 (10e-2)
+#define Rho21 (1e-3)
+#define Mu21 (1e-2)
 //Calculations
 #define Xcent (0.0)
 #define Ycent (0.0)
@@ -75,11 +75,9 @@ int main(int argc, char const *argv[]){
   sprintf (comm_vtk, "mkdir -p intermediate_vtk");//for dumping vtk files//comment out when not using
   system(comm_vtk);*/
 
-  rho1 = 1.0; 
-  rho2 = Rho21;
+  rho1 = 1.0; rho2 = Rho21;
   f.sigma = 1;//coeff of surface tension
-  mu1 = Oh1;
-  mu2 = Mu21*Oh1;
+  mu1 = Oh1; mu2 = Mu21*Oh1;
   G.x = -Bo; //gravity
   run();
 }
