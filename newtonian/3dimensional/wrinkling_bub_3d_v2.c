@@ -143,7 +143,7 @@ event writingFiles (t = 0, t += tsnap; t <= tmax) {
 
   //vtu outputs, comment out block when not needed
   char nameOut_vtu[80];
-  sprintf (nameOut_vtu, "intermediate_vtu/snapshot-%5.4f", t);
+  sprintf (nameOut_vtu, "intermediate_vtu/snapshot-%5.4f", 0.1*t);
   output_vtu((scalar *) {f, p}, (vector *) {u}, nameOut_vtu);//vtuend
 }
 
