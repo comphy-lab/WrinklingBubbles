@@ -6,7 +6,7 @@ import sys
 nGFS = 100
 #sos.system("mkdir itermediate_vtu")
 for ti in range(nGFS):
-    t = 0.010*0.1 * ti
+    t = 0.010 * ti
     place = "intermediate/snapshot-%5.4f" % t
     if not os.path.exists(place):
         print("File %s not found!" % place)
