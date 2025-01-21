@@ -1,6 +1,7 @@
-# Author: Vatsal Sanjay
-# vatsalsanjay@gmail.com
+# Author: Saumili Jana and Vatsal Sanjay
+# jsaumili@gmail.com
 # Physics of Fluids
+# Date: 21-01-2025
 
 import numpy as np
 import subprocess as sp
@@ -10,8 +11,8 @@ from functools import partial
 nGFS = 100 
 
 def gettingview(args):
-    filename, name = args
-    exe = ["./getview3D", filename, name]
+    filename, name, t = args
+    exe = ["./getview3D", filename, name, t]
     p = sp.Popen(exe, stdout=sp.PIPE, stderr=sp.PIPE)
     stdout, stderr = p.communicate()
     return name
@@ -26,7 +27,8 @@ def process_timestep(ti,folder):
     if os.path.exists(name):
         print("Image %s found!" % name)
         return None
-    return gettingview((place, name))
+    t = str(round(t,2))
+    return gettingview((place, name, t))
 
 if __name__ == '__main__':
     folder = 'Video_view'  # output folder
