@@ -53,7 +53,7 @@ int main(int argc, char const *argv[]){
   //assignments
   MAXlevel = 7; //max possible grid res
   tmax = 1.0;
-  Ldomain = 1.2;
+  Ldomain = 2;
 
   Bo = atof(argv[1]); //gravity
   Oh1 = atof(argv[2]);//liq film Oh
@@ -122,6 +122,7 @@ event adapt(i++){
 //Outpts
 //static
 event writingFiles (t = 0, t += tsnap; t <= tmax) {
+  p.nodump = false; // dump pressure
   dump (file = "dump");
   char nameOut[80];
   sprintf (nameOut, "intermediate/snapshot-%5.4f", t);
