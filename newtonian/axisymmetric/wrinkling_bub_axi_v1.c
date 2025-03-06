@@ -6,6 +6,9 @@
  * 
  * Last update: Oct 28, 2024, Vatsal
  * changelog: fixed the initial condition. 
+ * 
+ * Last update: Mar 6, 2025, Saumili
+ * Changelog: fixed boundary condition
 */
 
 //f: 1 is liq, 0 is gas phase
@@ -32,7 +35,7 @@
 Id2: indicates the surrounding gas/fluid(Newtonian)
 */
 #define Rho21 (1e-3)
-#define Mu21 (1e-2)
+//#define Mu21 (1e-2)
 //Calculations
 #define Xcent (0.0)
 #define Ycent (0.0)
@@ -41,9 +44,13 @@ Id2: indicates the surrounding gas/fluid(Newtonian)
 
 //Boundary conditions
 //velocity //x-axis axisymmetric
-u.t[left] = dirichlet(0.0);
-u.n[left] = dirichlet(0.0);
+u.t[left] = dirichlet(0.0);//wall
+u.n[left] = dirichlet(0.0);//wall
 f[left] = neumann(0.0); // this sets the contact angle to 90 degrees.
+
+u.t[right] = neumann(0.0);//outlow
+u.n[right] = neumann(0.0);//outflow
+p[right] = neumann(0.0);//pressure outflow
 
 //declarations
 int MAXlevel;
@@ -71,7 +78,7 @@ int main(int argc, char const *argv[]){
 
   rho1 = 1.0; rho2 = Rho21;
   f.sigma = 1; //coeff of surface tension
-  mu1 = Oh1; mu2 = Mu21*Oh1;
+  mu1 = Oh1; mu2 = 1e-4;// mu2 = Mu21*Oh1;
   G.x = -Bo; //gravity
   run();
 }
