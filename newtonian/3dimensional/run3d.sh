@@ -1,5 +1,5 @@
 #!/bin/bash
-Bo="0.0"
+Bo="0.001"
 Oh="10"
 k="10"
 qcc -fopenmp -O2 -disable-dimensions wrinkling_bub_3d_v2.c -o wrinkling_bub_3d_v2 -lm

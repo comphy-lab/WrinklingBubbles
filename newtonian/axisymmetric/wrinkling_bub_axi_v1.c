@@ -52,6 +52,10 @@ u.t[right] = neumann(0.0);//outlow
 u.n[right] = neumann(0.0);//outflow
 p[right] = neumann(0.0);//pressure outflow
 
+u.t[top] = neumann(0.0);//outlow
+u.n[top] = neumann(0.0);//outflow
+p[top] = neumann(0.0);//pressure outflow
+
 //declarations
 int MAXlevel;
 double tmax, Oh1, Bo, Ldomain, k, h;

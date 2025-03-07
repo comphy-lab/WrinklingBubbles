@@ -3,9 +3,9 @@
  
 Lo="1.2"
 nR="512"
-Oh="10000"
+Oh="20"
 tsnap="0.01"
-mu21="0.01"
+mu21="1e-4"
 
 qcc -O2 -disable-dimensions getFacet.c -o getFacet -lm
 qcc -O2 -disable-dimensions getData.c -o getData -lm
