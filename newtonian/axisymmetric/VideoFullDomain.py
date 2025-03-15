@@ -102,7 +102,7 @@ nr = int(GridsPerR*Ldomain)
 Ohd = float(sys.argv[3])
 tsnap = float(sys.argv[4])
 mu21 = float(sys.argv[5])
-Ohs = mu21*Ohd
+Ohs = 1e-4
 
 rmin, rmax, zmin, zmax = [-Ldomain, Ldomain, 0, Ldomain]
 lw = 1

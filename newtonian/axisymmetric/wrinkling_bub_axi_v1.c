@@ -50,11 +50,13 @@ f[left] = neumann(0.0); // this sets the contact angle to 90 degrees.
 
 u.t[right] = neumann(0.0);//outlow
 u.n[right] = neumann(0.0);//outflow
-p[right] = neumann(0.0);//pressure outflow
+//p[right] = neumann(0.0);//pressure outflow
+p[right] = dirichlet(0.0);
 
 u.t[top] = neumann(0.0);//outlow
 u.n[top] = neumann(0.0);//outflow
-p[top] = neumann(0.0);//pressure outflow
+//p[top] = neumann(0.0);//pressure outflow
+p[right] = dirichlet(0.0);
 
 //declarations
 int MAXlevel;
@@ -62,9 +64,9 @@ double tmax, Oh1, Bo, Ldomain, k, h;
 
 int main(int argc, char const *argv[]){
   //assignments
-  MAXlevel = 7; //max possible grid res
+  MAXlevel = 9; //max possible grid res
   tmax = 1.0;
-  Ldomain = 2;
+  Ldomain = 4;
 
   Bo = atof(argv[1]); //gravity
   Oh1 = atof(argv[2]);//liq film Oh
@@ -115,6 +117,13 @@ event init(t = 0){
       }
     }
     fractions (phi, f);
+    //pressure initialize
+
+    foreach(){
+      p[] = (R2circle(x,y)<1)?4:0; //initialize pressure
+      //u.x[] = 0;
+      //u.y[] = 0;
+    }
 
   }
 }
