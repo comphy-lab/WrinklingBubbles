@@ -33,7 +33,13 @@ TestResults.xml
 **/wrinkling_bub_3d_v1
 **/wrinkling_bub_3d_v2
 **/wrinkling_bub_axi_v1
+**/wrinkling_bub_axi
 **/getvtu
+**/getData-elastic-scalar2D
+**/getFacet
+**/getData
+
+**/Video_v1
 
 **/*.DS_Store
 
