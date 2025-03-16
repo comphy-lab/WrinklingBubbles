@@ -150,7 +150,7 @@ for ti in range(nGFS):
                 ## V
                 
                 cntrl1 = ax.imshow(vel, interpolation='Bilinear', cmap="Blues", origin='lower', extent=[-rminp, -rmaxp, zminp, zmaxp], vmax = 4.0, vmin = 0.0) #one half
-                cntrl2 = ax.imshow(TrA, interpolation='Bilinear', cmap="RdBu_r", origin='lower', extent=[rminp, rmaxp, zminp, zmaxp], vmax = 1.0, vmin = -1.0) #other half
+                cntrl2 = ax.imshow(TrA, interpolation='Bilinear', cmap="RdBu_r", origin='lower', extent=[rminp, rmaxp, zminp, zmaxp], vmax = 0.1, vmin = -0.1) #other half
 
                 
                 ax.set_aspect('equal')
