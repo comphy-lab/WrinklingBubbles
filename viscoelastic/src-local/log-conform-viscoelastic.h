@@ -381,7 +381,10 @@ event tracer_advection(i++)
       if (Lambda.x <= 0. || Lambda.y <= 0.) {
         fprintf(ferr, "Negative eigenvalue detected: Lambda.x = %g, Lambda.y = %g\n", Lambda.x, Lambda.y);
         fprintf(ferr, "x = %g, y = %g\n", x, y);
-        exit(1);
+        // Optionally clamp or track negative eigenvalues
+        Lambda.x = max(Lambda.x, 1e-8);
+        Lambda.y = max(Lambda.y, 1e-8);
+        fprintf(ferr, "Non-fatal clamp applied.\n");
       }
       
       /**
