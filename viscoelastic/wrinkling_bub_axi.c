@@ -61,7 +61,7 @@ p[right] = dirichlet(0.0);
 u.t[top] = neumann(0.0);//outlow
 u.n[top] = neumann(0.0);//outflow
 //p[top] = neumann(0.0);//pressure outflow
-p[right] = dirichlet(0.0);
+p[top] = dirichlet(0.0);
 
 //declarations
 int MAXlevel;
