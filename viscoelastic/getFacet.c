@@ -12,7 +12,6 @@ int main(int a, char const *arguments[])
 {
   sprintf (filename, "%s", arguments[1]);
   restore (file = filename);
-  f[left] = dirichlet(0.);
   f.prolongation = fraction_refine;
   FILE * fp = ferr;
   output_facets(f,fp);
