@@ -49,6 +49,16 @@ u.n[left] = dirichlet(0.0);
 u.r[left] = dirichlet(0.0);
 f[left] = neumann(0.0); // this sets the contact angle to 90 degrees.
 
+u.t[right] = neumann(0.0);
+u.n[right] = neumann(0.0);
+u.r[right] = neumann(0.0);
+p[right] = dirichlet(0.0);
+
+u.t[top] = neumann(0.0);//outlow
+u.n[top] = neumann(0.0);//outflow
+u.r[top] = neumann(0.0);
+p[top] = dirichlet(0.0);
+
 //pressure inside bubble film??
 
 //declarations
@@ -57,9 +67,9 @@ double tmax, Oh1, Bo, Ldomain, k, h;
 
 int main(int argc, char const *argv[]){
     //assignments
-  MAXlevel = 7; //max possible grid res
+  MAXlevel = 8; //max possible grid res
   tmax = 1.0;
-  Ldomain = 1.2;
+  Ldomain = 2;
 
   Bo = atof(argv[1]); //gravity
   Oh1 = atof(argv[2]);//liq film Oh
@@ -82,7 +92,7 @@ int main(int argc, char const *argv[]){
 
   rho1 = 1.0; rho2 = Rho21;
   f.sigma = 1;//coeff of surface tension
-  mu1 = Oh1; mu2 = Mu21*Oh1;
+  mu1 = Oh1; mu2 = 1e-4;// mu2 = Mu21*Oh1;
   G.x = -Bo; //gravity
   run();
 }
@@ -119,6 +129,14 @@ event init(t = 0){
     fractions (phi,f);  
     //f.prolongation = refine_bilinear;
     //boundary((scalar *){f});
+
+    //pressure initialize
+    foreach(){
+      p[] = (R3sphere(x,y,z)<1)?4:0; //initialize pressure
+      //u.x[] = 0;//initialize velocity
+      //u.y[] = 0;
+    }
+
   }
 }
 
