@@ -24,15 +24,12 @@ int main(int a, char const *arguments[]){
   //fprintf(ferr, "Ohd %3.2e, We %g\n", Ohd, We);
   //return 1;
 
-  //boundary conditions
+  //boundary conditions -- these you do not need in the post-processing script. In the older versions, you needed to set the BCs in the post-processing script, not anymore.
   //velocity //x-axis axisymmetric
-  u.t[left] = dirichlet(0.0);
-  u.n[left] = dirichlet(0.0);
-  f[left] = neumann(0.0); // this sets the contact angle to 90 degrees.
-  f.prolongation = refine_bilinear;
-  boundary((scalar *){f, u.x, u.y, p});
-
-
-  
+  // u.t[left] = dirichlet(0.0);
+  // u.n[left] = dirichlet(0.0);
+  // f[left] = neumann(0.0); // this sets the contact angle to 90 degrees.
+  // f.prolongation = refine_bilinear;
+  // boundary((scalar *){f, u.x, u.y, p});
 
 }

@@ -1,5 +1,5 @@
 /**
- * @file wrinkling_bub_axi_v1.c
+ * @file wrinkling_bub_axi.c
  * @author Saumili Jana (jsaumili@gmail.com)
  * @date 18-10-2024
  * Newtonian cases
@@ -10,7 +10,7 @@
  * Last update: Mar 6, 2025, Saumili
  * Changelog: fixed boundary condition
  * 
- * Viscoelastic case
+ * Viscoelastic case (_v2.c)
  * 
  * Last update: Mar 16, 2025, Vatsal
  * Changelog: Added viscoelasticity
