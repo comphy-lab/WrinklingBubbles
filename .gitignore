@@ -35,6 +35,9 @@ TestResults.xml
 **/wrinkling_bub_axi_v1
 **/wrinkling_bub_axi
 **/getvtu
+**/getData-elastic-scalar2D
+**/getFacet
+**/getData
 
 **/*.DS_Store
 

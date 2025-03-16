@@ -57,20 +57,18 @@ def gettingFacets(filename):
                     r1, z1 = np.array([float(temp3[1]), float(temp3[0])])
                     r2, z2 = np.array([float(temp4[1]), float(temp4[0])])
                     segs.append(((r1, z1),(r2,z2)))
-                    segs.append(((r1, -z1),(r2,-z2)))
                     segs.append(((-r1, z1),(-r2,z2)))
-                    segs.append(((-r1, -z1),(-r2,-z2)))
                     skip = True
     return segs
 
 def gettingfield(filename):
-    exe = ["./getData", filename, str(0), str(0), str(zmax), str(rmax), str(nr), str(Ohd), str(Ohs)]
+    exe = ["./getData-elastic-scalar2D", filename, str(0), str(0), str(zmax), str(rmax), str(nr), str(Ohd), str(Ohs)]
     p = sp.Popen(exe, stdout=sp.PIPE, stderr=sp.PIPE)
     stdout, stderr = p.communicate()
     temp1 = stderr.decode("utf-8")
     temp2 = temp1.split("\n")
     # print(temp2) #debugging
-    Rtemp, Ztemp, D2temp, veltemp = [],[],[],[]
+    Rtemp, Ztemp, D2temp, veltemp, TrAtemp = [],[],[],[],[]
     for n1 in range(len(temp2)):
         temp3 = temp2[n1].split(" ")
         if temp3 == ['']:
@@ -80,10 +78,12 @@ def gettingfield(filename):
             Rtemp.append(float(temp3[1]))
             D2temp.append(float(temp3[2]))
             veltemp.append(float(temp3[3]))
+            TrAtemp.append(float(temp3[4]))
     R = np.asarray(Rtemp)
     Z = np.asarray(Ztemp)
     D2 = np.asarray(D2temp)
     vel = np.asarray(veltemp)
+    TrA = np.asarray(TrAtemp)
     nz = int(len(Z)/nr)
     # print("nr is %d %d" % (nr, len(R))) # debugging
     print("nz is %d" % nz)
@@ -91,8 +91,8 @@ def gettingfield(filename):
     Z.resize((nz, nr))
     D2.resize((nz, nr))
     vel.resize((nz, nr))
-
-    return R, Z, D2, vel, nz
+    TrA.resize((nz, nr))
+    return R, Z, D2, vel, TrA, nz
 # ----------------------------------------------------------------------------------------------------------------------
 
 nGFS = 1000
@@ -126,7 +126,7 @@ for ti in range(nGFS):
             if (len(segs) == 0):
                 print("Problem in the available file %s" % place)
             else:
-                R, Z, D2, vel, nz = gettingfield(place) 
+                R, Z, D2, vel, TrA, nz = gettingfield(place) 
                 zminp, zmaxp, rminp, rmaxp = Z.min(), Z.max(), R.min(), R.max()
                 #print(zminp, zmaxp, rminp, rmaxp)
                 # Part to plot
@@ -149,8 +149,8 @@ for ti in range(nGFS):
                 #cntrl1 = ax.imshow(D2, cmap="hot_r", interpolation='Bilinear', origin='lower', extent=[-rminp, -rmaxp, zminp, zmaxp], vmax = 0.5, vmin = -3.0)
                 ## V
                 
-                cntrl1 = ax.imshow(vel, interpolation='Bilinear', cmap="Blues", origin='lower', extent=[-rminp, -rmaxp, zminp, zmaxp], vmax = 1.0, vmin = 0.0) #one half
-                cntrl2 = ax.imshow(vel, interpolation='Bilinear', cmap="Blues", origin='lower', extent=[rminp, rmaxp, zminp, zmaxp], vmax = 1.0, vmin = 0.0) #other half
+                cntrl1 = ax.imshow(vel, interpolation='Bilinear', cmap="Blues", origin='lower', extent=[-rminp, -rmaxp, zminp, zmaxp], vmax = 4.0, vmin = 0.0) #one half
+                cntrl2 = ax.imshow(TrA, interpolation='Bilinear', cmap="RdBu_r", origin='lower', extent=[rminp, rmaxp, zminp, zmaxp], vmax = 1.0, vmin = -1.0) #other half
 
                 
                 ax.set_aspect('equal')
@@ -159,17 +159,18 @@ for ti in range(nGFS):
                 # t2 = t/tc
                 ax.set_title('$t/t_c$ = %4.3f' % t, fontsize=TickLabel)
 
-                # l, b, w, h = ax.get_position().bounds
-                # cb1 = fig.add_axes([l+0.05*w, b-0.05, 0.40*w, 0.03])
-                # c1 = plt.colorbar(cntrl1,cax=cb1,orientation='horizontal')
-                # c1.set_label('$\log_{10}\left(\epsilon_\eta\\right)$',fontsize=TickLabel, labelpad=5)
-                # c1.ax.tick_params(labelsize=TickLabel)
-                # c1.ax.xaxis.set_major_formatter(StrMethodFormatter('{x:,.1f}'))
-                # cb2 = fig.add_axes([l+0.55*w, b-0.05, 0.40*w, 0.03])
-                # c2 = plt.colorbar(cntrl2,cax=cb2,orientation='horizontal')
-                # c2.ax.tick_params(labelsize=TickLabel)
-                # c2.set_label('$V$',fontsize=TickLabel)
-                # c2.ax.xaxis.set_major_formatter(StrMethodFormatter('{x:,.2f}'))
+                l, b, w, h = ax.get_position().bounds
+                cb1 = fig.add_axes([l+0.05*w, b-0.05, 0.40*w, 0.03])
+                c1 = plt.colorbar(cntrl1,cax=cb1,orientation='horizontal')
+                c1.set_label(r'$\|\mathbf{u}\|/V_\gamma$',fontsize=TickLabel, labelpad=5)
+                c1.ax.tick_params(labelsize=TickLabel)
+                c1.ax.xaxis.set_major_formatter(StrMethodFormatter('{x:,.1f}'))
+
+                cb2 = fig.add_axes([l+0.55*w, b-0.05, 0.40*w, 0.03])
+                c2 = plt.colorbar(cntrl2,cax=cb2,orientation='horizontal')
+                c2.ax.tick_params(labelsize=TickLabel)
+                c2.set_label(r'$\sigma_{ii}/(3G)$',fontsize=TickLabel)
+                c2.ax.xaxis.set_major_formatter(StrMethodFormatter('{x:,.2f}'))
                 ax.axis('off')
                 # plt.show()
                 plt.savefig(name, bbox_inches="tight")
