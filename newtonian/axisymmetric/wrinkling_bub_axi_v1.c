@@ -9,6 +9,9 @@
  * 
  * Last update: Mar 6, 2025, Saumili
  * Changelog: fixed boundary condition
+ * 
+ *  Last update: Mar 15, 2025, Saumili
+ * Changelog: updated pressure boundary conditions
 */
 
 //f: 1 is liq, 0 is gas phase
