@@ -6,6 +6,10 @@
  * 
  * Last update: Oct 30, 2024, Saumili
  * changelog: fixed the initial condition for 3d. 
+ * 
+ * Last update:Mar16, 2025, Saumili
+ * changelog: fixed the bounary condition for 3d, and initialised pressure 
+ *
 */
 
 //f: 1 is liq, 0 is gas phase
@@ -108,7 +112,7 @@ event init(t = 0){
     x_p = (x1+x2)/2;
 
     //refine((R3sphere(x,y,z) < 1.05) && (R3sphere(x,y,z)>sq(1.-h-0.05)) && (level < MAXlevel));
-    refine((R3sphere(x,y,z) < 1.05) && (level < MAXlevel));
+    refine((R3sphere(x,y,z) < 1.05) && (R3sphere(x,y,z) > 0.8) && (level < MAXlevel));
     
     vertex scalar phi[];
     foreach_vertex(reduction(+:theta), reduction(+:y_p), reduction(+:z_p)){
