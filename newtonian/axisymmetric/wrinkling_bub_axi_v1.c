@@ -10,8 +10,11 @@
  * Last update: Mar 6, 2025, Saumili
  * Changelog: fixed boundary condition
  * 
- *  Last update: Mar 15, 2025, Saumili
+ * Last update: Mar 15, 2025, Saumili
  * Changelog: updated pressure boundary conditions
+ * 
+ * Last update: Mar 31, 2025, Saumili
+ *  Chhangelog: increased no of iterations for convergence
 */
 
 //f: 1 is liq, 0 is gas phase
@@ -67,9 +70,11 @@ double tmax, Oh1, Bo, Ldomain, k, h;
 
 int main(int argc, char const *argv[]){
   //assignments
-  MAXlevel = 9; //max possible grid res
+  NITERMAX = 500; //increased no of iterations for convergence during initial timesteps for some cases
+  MAXlevel = 8; //max possible grid res
   tmax = 1.0;
-  Ldomain = 4;
+  Ldomain = 2.4;
+  
 
   Bo = atof(argv[1]); //gravity
   Oh1 = atof(argv[2]);//liq film Oh
@@ -104,7 +109,7 @@ event init(t = 0){
     x_p = (x1+x2)/2;
 
 
-    refine((R2circle(x,y) < 1.05) && (level < MAXlevel));
+    refine((R2circle(x,y) < 1.05) && (R2circle(x,y) > 0.95-h) && (level < MAXlevel));
 
     vertex scalar phi[];
     foreach_vertex() {
