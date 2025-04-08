@@ -15,6 +15,9 @@
  * 
  * Last update: Mar 31, 2025, Saumili
  *  Chhangelog: increased no of iterations for convergence
+ * 
+ *  * Last update: Apr 4, 2025, Saumili
+ *  Chhangelog: corrected pressure initial condition 
 */
 
 //f: 1 is liq, 0 is gas phase
@@ -70,7 +73,7 @@ double tmax, Oh1, Bo, Ldomain, k, h;
 
 int main(int argc, char const *argv[]){
   //assignments
-  NITERMAX = 500; //increased no of iterations for convergence during initial timesteps for some cases
+  //NITERMAX = 500; //increased no of iterations for convergence during initial timesteps for some cases
   MAXlevel = 8; //max possible grid res
   tmax = 1.0;
   Ldomain = 2.4;
@@ -109,7 +112,7 @@ event init(t = 0){
     x_p = (x1+x2)/2;
 
 
-    refine((R2circle(x,y) < 1.05) && (R2circle(x,y) > 0.95-h) && (level < MAXlevel));
+    refine((R2circle(x,y) < 1.05) && (R2circle(x,y) > sq(0.98-h)) && (level < MAXlevel));
 
     vertex scalar phi[];
     foreach_vertex() {
@@ -128,9 +131,20 @@ event init(t = 0){
     //pressure initialize
 
     foreach(){
-      p[] = (R2circle(x,y)<1)?4:0; //initialize pressure
-      //u.x[] = 0;
-      //u.y[] = 0;
+      //p[] = (R2circle(x,y)<1)?4:0; //initialize pressure
+      if ((R2circle(x,y)<sq(1.0-h)))
+      {  p[] = 4;
+      }
+      else if ((R2circle(x,y)<=1)&&((R2circle(x,y)>=sq(1.0-h))))
+      {
+         p[] = 2;
+      }
+      else
+      {
+        p[] = 0;
+      }
+      u.x[] = 0;
+      u.y[] = 0;
     }
 
   }
