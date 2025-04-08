@@ -149,27 +149,28 @@ for ti in range(nGFS):
                 #cntrl1 = ax.imshow(D2, cmap="hot_r", interpolation='Bilinear', origin='lower', extent=[-rminp, -rmaxp, zminp, zmaxp], vmax = 0.5, vmin = -3.0)
                 ## V
                 
-                cntrl1 = ax.imshow(vel, interpolation='Bilinear', cmap="Blues", origin='lower', extent=[-rminp, -rmaxp, zminp, zmaxp], vmax = 1.0, vmin = 0.0) #one half
-                cntrl2 = ax.imshow(vel, interpolation='Bilinear', cmap="Blues", origin='lower', extent=[rminp, rmaxp, zminp, zmaxp], vmax = 1.0, vmin = 0.0) #other half
+                cntrl1 = ax.imshow(vel, interpolation='Bilinear', cmap="Blues", origin='lower', extent=[-rminp, -rmaxp, zminp, zmaxp], vmax = 5.0, vmin = 0.0) #one half
+                cntrl2 = ax.imshow(D2, interpolation='Bilinear', cmap="hot_r", origin='lower', extent=[rminp, rmaxp, zminp, zmaxp], vmax = 4.0, vmin = -1.0) #other half
 
                 
                 ax.set_aspect('equal')
                 ax.set_xlim(rmin, rmax)
                 ax.set_ylim(zmin, zmax)
                 # t2 = t/tc
-                ax.set_title('$t/t_c$ = %4.3f' % t, fontsize=TickLabel)
+                ax.set_title('$t/t_c$ = %4.3f' % t, fontsize=24)
 
-                # l, b, w, h = ax.get_position().bounds
-                # cb1 = fig.add_axes([l+0.05*w, b-0.05, 0.40*w, 0.03])
-                # c1 = plt.colorbar(cntrl1,cax=cb1,orientation='horizontal')
-                # c1.set_label('$\log_{10}\left(\epsilon_\eta\\right)$',fontsize=TickLabel, labelpad=5)
-                # c1.ax.tick_params(labelsize=TickLabel)
-                # c1.ax.xaxis.set_major_formatter(StrMethodFormatter('{x:,.1f}'))
-                # cb2 = fig.add_axes([l+0.55*w, b-0.05, 0.40*w, 0.03])
-                # c2 = plt.colorbar(cntrl2,cax=cb2,orientation='horizontal')
-                # c2.ax.tick_params(labelsize=TickLabel)
-                # c2.set_label('$V$',fontsize=TickLabel)
-                # c2.ax.xaxis.set_major_formatter(StrMethodFormatter('{x:,.2f}'))
+                l, b, w, h = ax.get_position().bounds
+                cb1 = fig.add_axes([l+0.05*w, b-0.05, 0.40*w, 0.03])
+                c1 = plt.colorbar(cntrl1,cax=cb1,orientation='horizontal')
+                c1.set_label(r'$\|\mathbf{u}\|/V_\gamma$',fontsize=TickLabel, labelpad=5)
+                c1.ax.tick_params(labelsize=TickLabel)
+                c1.ax.xaxis.set_major_formatter(StrMethodFormatter('{x:,.1f}'))
+                
+                cb2 = fig.add_axes([l+0.55*w, b-0.05, 0.40*w, 0.03])
+                c2 = plt.colorbar(cntrl2,cax=cb2,orientation='horizontal')
+                c2.ax.tick_params(labelsize=TickLabel)
+                c2.set_label('$log_{10}(|\mathbf{D}|^2)$',fontsize=TickLabel)
+                c2.ax.xaxis.set_major_formatter(StrMethodFormatter('{x:,.2f}'))
                 ax.axis('off')
                 # plt.show()
                 plt.savefig(name, bbox_inches="tight")
