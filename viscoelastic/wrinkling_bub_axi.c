@@ -14,6 +14,9 @@
  * 
  * Last update: Mar 16, 2025, Vatsal
  * Changelog: Added viscoelasticity
+ * 
+ *  Last update: Apr 8, 2025, Saumili
+ *  Chhangelog: corrected pressure initial condition 
 */
 
 //f: 1 is liq, 0 is gas phase
@@ -111,8 +114,7 @@ event init(t = 0){
     x_p = (x1+x2)/2;
 
 
-    refine((R2circle(x,y) < 1.05) && (level < MAXlevel));
-
+    refine((R2circle(x,y) < 1.05) && (R2circle(x,y) > sq(0.98-h)) && (level < MAXlevel));
     vertex scalar phi[];
     foreach_vertex() {
       if (y >= y_p) {
@@ -130,9 +132,20 @@ event init(t = 0){
     //pressure initialize
 
     foreach(){
-      p[] = (R2circle(x,y)<1)?4:0; //initialize pressure
-      //u.x[] = 0;
-      //u.y[] = 0;
+      //p[] = (R2circle(x,y)<1)?4:0; //initialize pressure
+      if ((R2circle(x,y)<sq(1.0-h)))
+      {  p[] = 4;
+      }
+      else if ((R2circle(x,y)<=1)&&((R2circle(x,y)>=sq(1.0-h))))
+      {
+         p[] = 2;
+      }
+      else
+      {
+        p[] = 0;
+      }
+      u.x[] = 0;
+      u.y[] = 0;
     }
 
   }
