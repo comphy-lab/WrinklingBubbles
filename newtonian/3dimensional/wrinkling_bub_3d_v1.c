@@ -10,6 +10,9 @@
  * Last update:Mar16, 2025, Saumili
  * changelog: fixed the bounary condition for 3d, and initialised pressure 
  *
+ * Last update:Apr10, 2025, Saumili
+ * changelog: fixed the pressure initial condition for 3d
+ *
 */
 
 //f: 1 is liq, 0 is gas phase
@@ -112,7 +115,7 @@ event init(t = 0){
     x_p = (x1+x2)/2;
 
     //refine((R3sphere(x,y,z) < 1.05) && (R3sphere(x,y,z)>sq(1.-h-0.05)) && (level < MAXlevel));
-    refine((R3sphere(x,y,z) < 1.05) && (R3sphere(x,y,z) > 0.8) && (level < MAXlevel));
+    refine((R3sphere(x,y,z) < 1.05) && (R3sphere(x,y,z) >= sq(0.98-h)) && (level < MAXlevel));
     
     vertex scalar phi[];
     foreach_vertex(reduction(+:theta), reduction(+:y_p), reduction(+:z_p)){
@@ -136,9 +139,22 @@ event init(t = 0){
 
     //pressure initialize
     foreach(){
-      p[] = (R3sphere(x,y,z)<1)?4:0; //initialize pressure
-      //u.x[] = 0;//initialize velocity
-      //u.y[] = 0;
+      //p[] = (R3sphere(x,y,z)<1)?4:0; //initialize pressure
+      if ((R3sphere(x,y,z)<sq(1.0-h)))
+      {  p[] = 4;
+      }
+      else if ((R3sphere(x,y,z)<=1)&&((R3sphere(x,y,z)>=sq(1.0-h))))
+      {
+         p[] = 2;
+      }
+      else
+      {
+        p[] = 0;
+      }
+
+
+      u.x[] = 0;//initialize velocity
+      u.y[] = 0;
     }
 
   }
