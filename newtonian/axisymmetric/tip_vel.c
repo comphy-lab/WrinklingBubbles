@@ -87,7 +87,7 @@ int main(int a, char const *arguments[]){
 
   if (x_tip<= xMax-0.15){ //if significant distance between x_tip detected and max film height>>film gemetry different
     fprintf(stderr, "xtip = %g, xMax = %g\n", x_tip, xMax); 
-    fprintf("detected tip is incorrect due to geometry of the film, significant distance between x_tip and xMax"); 
+    fprintf(stderr, "detected tip is incorrect due to geometry of the film, significant distance between x_tip and xMax"); 
     foreach(){
       if ((f[] > f_thresh) && (f[] < 1. - f_thresh) && (d[] == MainPhase)){
         coord n1 = facet_normal (point, f, s);
@@ -128,7 +128,7 @@ int main(int a, char const *arguments[]){
     fprintf(fp, "t x_tip y_tip uTip vTip\n");    
   }
   
-  fprintf(ferr, "%6.5e %6.5e %6.5e %6.5e %6.5e \n", t, x_tip, y_tip, uTip, vTip);
+  fprintf(ferr, "%6.5e %6.5e %6.5e %6.5e %6.5e \n",t, x_tip, y_tip, uTip, vTip);
   fprintf(fp, "%6.5e %6.5e %6.5e %6.5e %6.5e \n", t, x_tip, y_tip, vTip, uTip);
   fclose(fp);
 
