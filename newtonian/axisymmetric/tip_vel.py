@@ -8,7 +8,7 @@ import sys
 
 
 
-nGFS = 100
+nGFS = 1000
 name = "film_tip.dat"
 
 if os.path.exists(name):
