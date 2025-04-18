@@ -97,7 +97,7 @@ f.write(str(Oh)+" "+str(k)+" "+str(v_avg)+'\n')
 f.close()
 
 #Plot x_tip(height-z) vs t_sacled
-df_final["scaled_t"] = df_f["t"]/v_avg
+df_final["scaled_t"] = df_f["t"]*v_avg
 
 plt.plot(df_final["scaled_t"], df_final["x_tip"], 'b--', linewidth = "1.5")
 plt.plot(df_final["scaled_t"], df_final["x_tip"], 'bo')
