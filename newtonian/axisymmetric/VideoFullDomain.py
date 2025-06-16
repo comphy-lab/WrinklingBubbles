@@ -169,7 +169,7 @@ for ti in range(nGFS):
                 cb2 = fig.add_axes([l+0.55*w, b-0.05, 0.40*w, 0.03])
                 c2 = plt.colorbar(cntrl2,cax=cb2,orientation='horizontal')
                 c2.ax.tick_params(labelsize=TickLabel)
-                c2.set_label('$log_{10}(|\mathbf{D}|^2)$',fontsize=TickLabel)
+                c2.set_label(r'$log_{10}(|\mathbf{D}|^2)$',fontsize=TickLabel)
                 c2.ax.xaxis.set_major_formatter(StrMethodFormatter('{x:,.2f}'))
                 ax.axis('off')
                 # plt.show()
