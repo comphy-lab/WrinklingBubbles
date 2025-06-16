@@ -18,7 +18,7 @@
 //f: 1 is liq, 0 is gas phase
 #include "grid/octree.h"//3d grid
 #include "navier-stokes/centered.h"
-#define FILTERED // Smear density and viscosity jumps
+#define FILTERED 1// Smear density and viscosity jumps
 #include "two-phase.h"
 #include "navier-stokes/conserving.h"
 // #include "log-conform-ViscoElastic_v6.h" // VE part
@@ -118,7 +118,7 @@ event init(t = 0){
     refine((R3sphere(x,y,z) < 1.05) && (R3sphere(x,y,z) >= sq(0.98-h)) && (level < MAXlevel));
     
     vertex scalar phi[];
-    foreach_vertex(reduction(+:theta), reduction(+:y_p), reduction(+:z_p)){
+    foreach_vertex(reduction(+:theta) reduction(+:y_p) reduction(+:z_p)){
       theta = atan(z/y);
       y_p = d_h*cos(theta);
       z_p = d_h*sin(theta);

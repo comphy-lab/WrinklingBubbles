@@ -22,7 +22,7 @@
 //f: 1 is liq, 0 is gas phase
 #include "axi.h" //remove for 3d case
 #include "navier-stokes/centered.h"
-#define FILTERED // Smear density and viscosity jumps
+#define FILTERED 1// Smear density and viscosity jumps
 #include "src-local/log-conform-viscoelastic-scalar-2D.h"
 #include "src-local/two-phaseVE.h"
 #include "navier-stokes/conserving.h"
