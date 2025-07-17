@@ -47,7 +47,7 @@ Id2: indicates the surrounding gas/fluid(Newtonian)
 //#define Mu21 (1e-2)
 //Calculations
 
-#define Xcent (0.2)
+#define Xcent (0.2) //keep same as height of liquid layers
 #define Ycent (0.0)
 
 #define R2circle(x,y) (sq(x - Xcent) + sq(y - Ycent))
@@ -75,7 +75,7 @@ double tmax, Oh1, Bo, Ldomain, k, h;
 int main(int argc, char const *argv[]){
   //assignments
   //NITERMAX = 500; //increased no of iterations for convergence during initial timesteps for some cases
-  MAXlevel = 8; //max possible grid res
+  MAXlevel = 9; //max possible grid res
   tmax = 1.0;
   Ldomain = 2.4;
   
@@ -105,25 +105,67 @@ int main(int argc, char const *argv[]){
 //Initial condition// 
 event init(t = 0){
   if(!restore (file = "dump")){
-    float y_p, x_p, x1, x2, x_l;
-    x_l = Xcent;
+    float y_p, x_p, x1, x2, x_l, r_fo, r_fi, x_fo, y_fo, x_fi, y_fi, delta;
+  
+    x_l = Xcent; //height of liquid layer
     h = 1/k;
-    y_p = 0.1;
+    y_p = 0.1; 
     x1 = sqrt(sq(1.0-h)-sq(y_p))+x_l;
     x2 = sqrt(1-sq(y_p))+x_l;
     x_p = (x1+x2)/2;
-  
+
+    delta = 0.01;
+    r_fo = 0.1; //fillet radius
+    x_fo = x_l + r_fo;//outer fillet centre x coordinate
+    y_fo = sqrt(1-sq(x_fo-x_l)) + r_fo; //outer fillet centre y coordinate
     
+    r_fi = 0.1;
+    x_fi = x_l + r_fi;//inner fillet centre x coordinate
+    y_fi = sqrt(sq(1-h)-sq(x_fi - x_l))-r_fi;//inner fillet centre y coordinate
 
 
     refine((R2circle(x,y) < 1.05) && (R2circle(x,y) > sq(0.98-h)) && (level < MAXlevel));//bubble shell
-    refine((x < (x_l+0.1)) && ((x > x_l-0.1))&&(level < MAXlevel));//liq film
+    refine((x < (x_l+0.1)) && ((x > x_l-0.05))&&(level < MAXlevel));//liq film
 
     vertex scalar phi[];
 
-    foreach_vertex(){
-      if (x<x_l){
+    /*foreach_vertex(){
+      if (x<=x_l){
         phi[] = (x_l - x);
+      }
+     else if ((x>x_l)&&(x<=x_fi)){
+      if ((y<(1-h/2)) && (y>y_fi)){
+        phi [] = (sq(x-x_fi) + sq(y-y_fi) - sq(r_fi)); //inner side fillet
+      }
+      else if ((y>(1-h/2)) && (y<y_fo)){
+        phi [] = (sq(x-x_fo) + sq(y-y_fo) - sq(r_fo)); //outer side fillet
+      }
+     }
+      else {
+        if (y >= y_p) {
+          // Upper part - spherical rim
+          double r = sqrt(sq(x-x_l) + sq(y));
+          double shell = min(1. - r, (r - (1. - h)));//check
+          phi[] = shell;
+        } 
+        else {
+          // Lower part - half circle
+          phi[] = (h/2 - sqrt(sq(x - x_p) + sq(y - y_p)));
+        }
+      }
+    }*/
+
+    foreach_vertex(){
+      if (x<=x_l){
+        phi[] = (x_l - x);
+      }
+      else if ((x>x_l)&&(x<=x_fi)&&(y<(1-h/2)) && (y>y_fi)){
+      //if ((y<(1-h/2)) && (y>y_fi)){
+        phi [] = (sq(x-x_fi) + sq(y-y_fi) - sq(r_fi)); //inner side fillet
+      }
+      else if ((x>=x_l)&&(x<=x_fo)&&(y>(1-h/2)) && (y<y_fo)){
+        phi [] = (sq(x-x_fo) + sq(y-y_fo) - sq(r_fo)); //outer side fillet
+      //}
       }
       else {
         if (y >= y_p) {
