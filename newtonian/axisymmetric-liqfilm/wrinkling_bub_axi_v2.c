@@ -71,6 +71,7 @@ p[top] = dirichlet(0.0);
 //declarations
 int MAXlevel;
 double tmax, Oh1, Bo, Ldomain, k, h;
+float y_p, x_p, x1, x2, x_l, r_fo, r_fi, x_fo, y_fo, x_fi, y_fi, x_ci, x_co, y_ci, y_co, theta_i, theta_o, delta;
 
 int main(int argc, char const *argv[]){
   //assignments
@@ -105,7 +106,7 @@ int main(int argc, char const *argv[]){
 //Initial condition// 
 event init(t = 0){
   if(!restore (file = "dump")){
-    float y_p, x_p, x1, x2, x_l, r_fo, r_fi, x_fo, y_fo, x_fi, y_fi, delta;
+    
   
     x_l = Xcent; //height of liquid layer
     h = 1/k;
@@ -115,17 +116,24 @@ event init(t = 0){
     x_p = (x1+x2)/2;
 
     delta = 0.01;
-    r_fo = 0.1; //fillet radius
+    //outer fillet
+    r_fo = 0.2; //fillet radius
     x_fo = x_l + r_fo;//outer fillet centre x coordinate
-    y_fo = sqrt(1-sq(x_fo-x_l)) + r_fo; //outer fillet centre y coordinate
-    
-    r_fi = 0.1;
+    y_fo = sqrt(sq(1+r_fo)-sq(x_fo-x_l)); //outer fillet centre y coordinate
+    theta_o = atan(r_fo/y_fo);
+    x_co = x_l + sin(theta_o); //contact point-x coordinate
+    y_co = cos(theta_o);//contact point-y coordinate
+    //inner fillet
+    r_fi = 0.0;//fillet radius
     x_fi = x_l + r_fi;//inner fillet centre x coordinate
-    y_fi = sqrt(sq(1-h)-sq(x_fi - x_l))-r_fi;//inner fillet centre y coordinate
+    y_fi = sqrt(sq(1-h-r_fi)-sq(x_fi-x_l));//inner fillet centre y coordinate
+    theta_i = atan(r_fi/y_fi);
+    x_ci = x_l+ (1-h)*sin(theta_i);//contact point-x coordinate
+    y_ci = (1-h)*cos(theta_i);//contact point-y coordinate
 
 
     refine((R2circle(x,y) < 1.05) && (R2circle(x,y) > sq(0.98-h)) && (level < MAXlevel));//bubble shell
-    refine((x < (x_l+0.1)) && ((x > x_l-0.05))&&(level < MAXlevel));//liq film
+    refine((x < (x_l+0.1)) && ((x > x_l-0.1))&&(level < MAXlevel));//liq film
 
     vertex scalar phi[];
 
@@ -133,11 +141,11 @@ event init(t = 0){
       if (x<=x_l){
         phi[] = (x_l - x);
       }
-     else if ((x>x_l)&&(x<=x_fi)){
-      if ((y<(1-h/2)) && (y>y_fi)){
+     else if ((x>x_l)&&(x<=x_c)){
+      if ((y<((y_ci+y_co)/2)) && (y>y_fi)){
         phi [] = (sq(x-x_fi) + sq(y-y_fi) - sq(r_fi)); //inner side fillet
       }
-      else if ((y>(1-h/2)) && (y<y_fo)){
+      else if ((y>((y_ci+y_co)/2)) && (y<y_fo)){
         phi [] = (sq(x-x_fo) + sq(y-y_fo) - sq(r_fo)); //outer side fillet
       }
      }
@@ -156,14 +164,14 @@ event init(t = 0){
     }*/
 
     foreach_vertex(){
-      if (x<=x_l){
+      if (x<x_l){
         phi[] = (x_l - x);
       }
-      else if ((x>x_l)&&(x<=x_fi)&&(y<(1-h/2)) && (y>y_fi)){
+      else if ((x>=x_l)&&(x<=x_ci)&&(y<(1-h/2)) && (y>=y_fi)){
       //if ((y<(1-h/2)) && (y>y_fi)){
         phi [] = (sq(x-x_fi) + sq(y-y_fi) - sq(r_fi)); //inner side fillet
       }
-      else if ((x>=x_l)&&(x<=x_fo)&&(y>(1-h/2)) && (y<y_fo)){
+      else if ((x>=x_l)&&(x<=x_co)&&(y>(1-h/2)) && (y<=y_fo)){
         phi [] = (sq(x-x_fo) + sq(y-y_fo) - sq(r_fo)); //outer side fillet
       //}
       }
@@ -202,6 +210,7 @@ event init(t = 0){
       if(x<x_l){
         p[] = 2;
       }
+      //else if ()
       else{
         if ((R2circle(x,y)<sq(1.0-h)))
         {  
@@ -250,6 +259,7 @@ event logWriting (i++) {
   static FILE * fp;
   if (pid() == 0){
     if (i == 0) {
+      fprintf (ferr, "y_ci %g, y_co %g\n", y_fi, y_fo);//debug
       fprintf (ferr, "i dt t\n");
       fp = fopen ("log", "w");
       fprintf (fp, "Level %d, tmax %g, Oh %3.2e, Bo %2.1e, Lo %g\n", MAXlevel, tmax, Oh1, Bo, Ldomain);
