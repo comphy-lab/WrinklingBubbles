@@ -115,7 +115,7 @@ event init(t = 0){
     x2 = sqrt(1-sq(y_p))+x_l;
     x_p = (x1+x2)/2;
 
-    delta = 0.01;
+    //delta = 0.01;
     //outer fillet
     r_fo = 0.2; //fillet radius
     x_fo = x_l + r_fo;//outer fillet centre x coordinate
@@ -124,7 +124,7 @@ event init(t = 0){
     x_co = x_l + sin(theta_o); //contact point-x coordinate
     y_co = cos(theta_o);//contact point-y coordinate
     //inner fillet
-    r_fi = 0.0;//fillet radius
+    r_fi = 0.05;//fillet radius
     x_fi = x_l + r_fi;//inner fillet centre x coordinate
     y_fi = sqrt(sq(1-h-r_fi)-sq(x_fi-x_l));//inner fillet centre y coordinate
     theta_i = atan(r_fi/y_fi);
@@ -164,7 +164,7 @@ event init(t = 0){
     }*/
 
     foreach_vertex(){
-      if (x<x_l){
+      if (x<=x_l){
         phi[] = (x_l - x);
       }
       else if ((x>=x_l)&&(x<=x_ci)&&(y<(1-h/2)) && (y>=y_fi)){
@@ -210,7 +210,22 @@ event init(t = 0){
       if(x<x_l){
         p[] = 2;
       }
-      //else if ()
+      else if ((x>=x_l)&&(x<=x_ci)&&(y<(1-h/2)) && (y>=y_fi)){
+        if ((sq(x-x_fi)+sq(y-y_fi)-sq(r_fi))>0){
+          p[] = 2;
+        }
+        else {
+          p[] = 4;
+        }
+      }
+      else if ((x>=x_l)&&(x<=x_co)&&(y>(1-h/2)) && (y<=y_fo)){
+        if ((sq(x-x_fo)+sq(y-y_fo)-sq(r_fo))>0){
+          p[] = 2;
+        }
+        else {
+          p[] = 0;
+        }
+      }
       else{
         if ((R2circle(x,y)<sq(1.0-h)))
         {  
