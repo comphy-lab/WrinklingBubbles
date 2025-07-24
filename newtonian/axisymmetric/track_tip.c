@@ -1,8 +1,16 @@
-/* Title: tracking the tip displacement and velocity-v1
+/* Title: tracking the tip displacement and velocity-v2
 # Author: Saumili Jana
 # jsaumili@gmail.com
-# Date: 17-04-2025
+# Date: 24-07-2025
 */
+
+/* Nomenclature:
+*(x1,y1): topmost point of the liquid film
+*(x2,y2): radially innermost point of the liquid film
+*(x3, y3): 
+*(x_tip, y_tip): coordinates of the film tip
+*/
+
 
 //f: 1 is liq, 0 is gas phase
 #include "axi.h" //remove for 3d case
@@ -13,7 +21,7 @@
 
 scalar f[], * interfaces = {f};
 double vel;
-char filename[80], NameOutput[80]; //inut file and file with output respetively
+char filename[80], NameOutput[80];//inut file and file with output respetively
 
 int main(int a, char const *arguments[]){
   sprintf(filename, "%s", arguments[1]);
@@ -61,50 +69,31 @@ int main(int a, char const *arguments[]){
   double y_tip = 0;
   double f_thresh = threshold;
 
+  double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+
+
   foreach(){
     if ((f[] > f_thresh) && (f[] < 1. - f_thresh) && (d[] == MainPhase)){
       coord n1 = facet_normal (point, f, s);
       double alpha1 = plane_alpha (f[], n1);
       coord segment1[2];
       if (facets (n1, alpha1, segment1) == 2){
-        double x1 = x + (segment1[0].x+segment1[1].x)*Delta/2.;
-        double y1 = y + (segment1[0].y+segment1[1].y)*Delta/2.;
+        double xp = x + (segment1[0].x+segment1[1].x)*Delta/2.;
+        double yp = y + (segment1[0].y+segment1[1].y)*Delta/2.;
         //fprintf(stderr, "x1 = %g, yMin = %g\n", x1, yMin); //debug
-        if (y1<yMin){//track innermost point-film tip
-          yMin = y1;
-          y_tip = y1;
-          x_tip = x1;
-          uTip = interpolate(u.x, x_tip, yMin);
-          vTip = interpolate(u.y, x_tip, yMin);
+        if (xp>xMax){//check max film height 
+          xMax = xp;
+          x1 = xp;
+          y1 = yp;        
         }
-        if (x1>xMax){
-          xMax = x1;    //check max film height     
+        if (yp<yMin){//track innermost point-film tip
+          yMin = yp;
+          y2 = yp;
+          x2 = xp;
+          //uTip = interpolate(u.x, x_tip, yMin);
+          //vTip = interpolate(u.y, x_tip, yMin);
         }
-
-      }
-    }
-  }
-
-  if (x_tip<= xMax-0.15){ //if significant distance between x_tip detected and max film height>>film gemetry different
-    fprintf(stderr, "xtip = %g, xMax = %g\n", x_tip, xMax); 
-    fprintf(stderr, "detected tip is incorrect due to geometry of the film, significant distance between x_tip and xMax"); 
-    foreach(){
-      if ((f[] > f_thresh) && (f[] < 1. - f_thresh) && (d[] == MainPhase)){
-        coord n1 = facet_normal (point, f, s);
-        double alpha1 = plane_alpha (f[], n1);
-        coord segment1[2];
-        if (facets (n1, alpha1, segment1) == 2){
-          double x1 = x + (segment1[0].x+segment1[1].x)*Delta/2.;
-          double y1 = y + (segment1[0].y+segment1[1].y)*Delta/2.;
-          //fprintf(stderr, "x1 = %g, yMin = %g\n", x1, yMin); debug
-          if((y1<yMin+0.075)&&(x1>x_tip)){
-            x_tip = x1;
-            y_tip = y1;
-            uTip = interpolate(u.x, x_tip, y_tip);
-            vTip = interpolate(u.y, x_tip, y_tip);
-          }
-
-        }
+        
       }
     }
   }
@@ -124,12 +113,12 @@ int main(int a, char const *arguments[]){
   restore (file = filename);
 
   if (t == 0){
-    fprintf(ferr, "t x_tip y_tip uTip vTip\n");
-    fprintf(fp, "t x_tip y_tip uTip vTip\n");    
+    fprintf(ferr, "t x1 y1 x2 y2\n");
+    fprintf(fp, "t x1 y1 x2 y2\n");    
   }
   
-  fprintf(ferr, "%6.5e %6.5e %6.5e %6.5e %6.5e \n",t, x_tip, y_tip, uTip, vTip);
-  fprintf(fp, "%6.5e %6.5e %6.5e %6.5e %6.5e \n", t, x_tip, y_tip, vTip, uTip);
+  fprintf(ferr, "%6.5e %6.5e %6.5e %6.5e %6.5e \n",t, x1, y1, x2, y2);
+  fprintf(fp, "%6.5e %6.5e %6.5e %6.5e %6.5e \n", t, x1, y1, x2, y2);
   fclose(fp);
 
 }
