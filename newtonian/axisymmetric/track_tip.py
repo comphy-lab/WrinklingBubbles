@@ -20,5 +20,9 @@ for ti in range(nGFS):
         print("File %s not found!" % place)
     else:
         exe = "./track_tip %s %s" % (place, name)
-        os.system(exe)
+        #os.system(exe)
+        ret = os.system(exe)
+        if ret != 0:
+            print(f"track_tip ended with return code {ret}. Film reached the bottommost point. Stopping execution.")
+            break
     print(("Done %d of %d" % (ti, nGFS)))

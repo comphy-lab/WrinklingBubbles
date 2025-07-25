@@ -93,32 +93,30 @@ int main(int a, char const *arguments[]){
           //uTip = interpolate(u.x, x_tip, yMin);
           //vTip = interpolate(u.y, x_tip, yMin);
         }
-        
       }
     }
   }
+  
+  double r_c = sqrt((sq(x1-x2)+sq(y1-y2))/2);
+  if (x2<0.05){
+    fprintf(ferr, "film tip reached the bottom");
+    return 1;
+  }
+
   //fprintf(ferr, "xTip %3.2e, YTip %g\n", x_tip, yMin);
   //return 1;
 
-  //boundary conditions -- these you do not need in the post-processing script. In the older versions, you needed to set the BCs in the post-processing script, not anymore.
-  //velocity //x-axis axisymmetric
-  // u.t[left] = dirichlet(0.0);
-  // u.n[left] = dirichlet(0.0);
-  // f[left] = neumann(0.0); // this sets the contact angle to 90 degrees.
-  // f.prolongation = refine_bilinear;
-  // boundary((scalar *){f, u.x, u.y, p});
-  
   FILE *fp;
   fp = fopen (NameOutput, "a");
   restore (file = filename);
 
   if (t == 0){
-    fprintf(ferr, "t x1 y1 x2 y2\n");
-    fprintf(fp, "t x1 y1 x2 y2\n");    
+    fprintf(ferr, "t x1 y1 x2 y2 r_c\n");
+    fprintf(fp, "t x1 y1 x2 y2 r_c\n");    
   }
   
-  fprintf(ferr, "%6.5e %6.5e %6.5e %6.5e %6.5e \n",t, x1, y1, x2, y2);
-  fprintf(fp, "%6.5e %6.5e %6.5e %6.5e %6.5e \n", t, x1, y1, x2, y2);
+  fprintf(ferr, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e\n",t, x1, y1, x2, y2, r_c);
+  fprintf(fp, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e\n", t, x1, y1, x2, y2, r_c);
   fclose(fp);
 
 }
