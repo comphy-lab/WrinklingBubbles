@@ -22,10 +22,14 @@
 scalar f[], * interfaces = {f};
 double vel;
 char filename[80], NameOutput[80];//inut file and file with output respetively
+float Oh, k;
+bool flag = 0; //flag is 1 when (x_tip,y_tip) is assigned - to avoid multiple assignment
 
 int main(int a, char const *arguments[]){
   sprintf(filename, "%s", arguments[1]);
   sprintf(NameOutput, "%s", arguments[2]);
+  Oh = atof(arguments[3]);
+  k = atof(arguments[4]);
 
   restore(file = filename);
   boundary((scalar *){f, u.x, u.y, p});
@@ -59,6 +63,7 @@ int main(int a, char const *arguments[]){
   }//check for tiny strays
   // tag all liquid parts ends
   fprintf(ferr, "successfully tagged liquid region\n");//debugging
+  
   
   face vector s[];
   s.x.i = -1;
@@ -97,11 +102,23 @@ int main(int a, char const *arguments[]){
     }
   }
   
-  double r_c = sqrt((sq(x1-x2)+sq(y1-y2))/2);
+  //check whether the film has hit the bottom or not?-end execution if it touched the bottom most point
   if (x2<0.05){
     fprintf(ferr, "film tip reached the bottom");
     return 1;
   }
+  double r_c = sqrt((sq(x1-x2)+sq(y1-y2))/2);
+  
+  if (Oh>1){
+    fprintf(ferr, "Collapsing Bubble");
+    x_tip = x2;
+    y_tip = y2;
+    flag = 1;
+  }
+
+  
+
+//
 
   //fprintf(ferr, "xTip %3.2e, YTip %g\n", x_tip, yMin);
   //return 1;
@@ -111,12 +128,12 @@ int main(int a, char const *arguments[]){
   restore (file = filename);
 
   if (t == 0){
-    fprintf(ferr, "t x1 y1 x2 y2 r_c\n");
-    fprintf(fp, "t x1 y1 x2 y2 r_c\n");    
+    fprintf(ferr, "t x1 y1 x2 y2 x_tip y_tip r_c\n");
+    fprintf(fp, "t x1 y1 x2 y2 x_tip y_tip r_c\n");    
   }
   
-  fprintf(ferr, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e\n",t, x1, y1, x2, y2, r_c);
-  fprintf(fp, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e\n", t, x1, y1, x2, y2, r_c);
+  fprintf(ferr, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e\n",t, x1, y1, x2, y2, x_tip, y_tip, r_c);
+  fprintf(fp, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e\n", t, x1, y1, x2, y2, x_tip, y_tip, r_c);
   fclose(fp);
 
 }
