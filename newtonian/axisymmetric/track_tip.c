@@ -69,12 +69,13 @@ int main(int a, char const *arguments[]){
   s.x.i = -1;
   double yMin = HUGE;
   double xMax = -HUGE;
+  double yMax = -HUGE;
   double uTip = 0, vTip = 0;
   double x_tip = 0;
   double y_tip = 0;
   double f_thresh = threshold;
 
-  double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+  double x1 = 0, y1 = 0, x2 = 0, y2 = 0, x3 = 0, y3 = 0;
 
 
   foreach(){
@@ -116,9 +117,23 @@ int main(int a, char const *arguments[]){
     flag = 1;
   }
 
-  
-
-//
+foreach(){
+    if ((flag != 1)&&(f[] > f_thresh) && (f[] < 1. - f_thresh) && (d[] == MainPhase)){
+      coord n1 = facet_normal (point, f, s);
+      double alpha1 = plane_alpha (f[], n1);
+      coord segment1[2];
+      if (facets (n1, alpha1, segment1) == 2){
+        double xp1 = x + (segment1[0].x+segment1[1].x)*Delta/2.;
+        double yp1 = y + (segment1[0].y+segment1[1].y)*Delta/2.;
+        
+        if ((xp1>x2)&&(xp1<x1)&&(yp1>yMax)){
+          yMax = yp1;
+          x3 = xp1;
+          y3 = yp1;
+        }
+      }
+    }
+  }
 
   //fprintf(ferr, "xTip %3.2e, YTip %g\n", x_tip, yMin);
   //return 1;
@@ -128,12 +143,12 @@ int main(int a, char const *arguments[]){
   restore (file = filename);
 
   if (t == 0){
-    fprintf(ferr, "t x1 y1 x2 y2 x_tip y_tip r_c\n");
-    fprintf(fp, "t x1 y1 x2 y2 x_tip y_tip r_c\n");    
+    fprintf(ferr, "t x1 y1 x2 y2 x3 y3 x_tip y_tip r_c\n");
+    fprintf(fp, "t x1 y1 x2 y2 x3 y3 x_tip y_tip r_c\n");    
   }
   
-  fprintf(ferr, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e\n",t, x1, y1, x2, y2, x_tip, y_tip, r_c);
-  fprintf(fp, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e\n", t, x1, y1, x2, y2, x_tip, y_tip, r_c);
+  fprintf(ferr, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e\n",t, x1, y1, x2, y2, x3, y3, x_tip, y_tip, r_c);
+  fprintf(fp, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e\n", t, x1, y1, x2, y2, x3, y3, x_tip, y_tip, r_c);
   fclose(fp);
 
 }
