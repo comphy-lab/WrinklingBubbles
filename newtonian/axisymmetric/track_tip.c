@@ -137,11 +137,12 @@ int main(int a, char const *arguments[]){
 
   double r_2c = sqrt((sq(x1-x2)+sq(y1-y2))/2);
   double r_3c = sqrt((sq(x1-x3)+sq(y1-y3))/2);
-  double x_t = x1-2*r_3c; //max threshold for flip
+  double x_t = x1-2*r_3c;
+   //max threshold for flip
   double delta = 1e-2;
   double y_tMax = -HUGE;
   double y_tMin = HUGE;
-  double y_av, x_c, y_c, theta;
+  double y_av, x_c, y_c, r_c, theta, x_b;
   
   if ((flag != 1)&&(x2<x_t)){//flipped film
     flip = 1;
@@ -164,16 +165,50 @@ int main(int a, char const *arguments[]){
       }
     }
     y_av = 0.5*(y_tMin+y_tMax);
-    x_c = x3;
+    x_c = x3;//centre of the circle formed by (x1,y1) and (x2, y2)
     y_c = y1;
-    theta = atan((x_c-x2)/(y_c-y_av));
+    theta = atan2((x_c-x2),(y_c-y_av));
 
     x_tip = x_c + r_3c*sin(theta);
     y_tip = y_c + r_3c*cos(theta);
+    flag = 1;
   }
-  /*else if (flag != 1){
+  else if (flag != 1){
+    y_c = y1;
+    r_c = (r_2c<r_3c)?r_2c:r_3c ;
+    x_c = (r_2c<r_3c)?x2:x3 ;
 
-  }*/
+    x_b = x_c-1.5*r_c;
+    if (x_b<delta){
+      fprintf(ferr, "film tip reached the bottom -2");
+      return 1;
+    }
+
+    foreach(){
+      if ((flag != 1)&&(f[] > f_thresh) && (f[] < 1. - f_thresh) && (d[] == MainPhase)){
+        coord n1 = facet_normal (point, f, s);
+        double alpha1 = plane_alpha (f[], n1);
+        coord segment1[2];
+        if (facets (n1, alpha1, segment1) == 2){
+          double xp2 = x + (segment1[0].x+segment1[1].x)*Delta/2.;
+          double yp2 = y + (segment1[0].y+segment1[1].y)*Delta/2.;
+          
+          if ((xp2>=x_b-delta)&&(xp2<x2+delta)&&(yp2>y_tMax)){
+            y_tMax = yp2;
+          }
+          if ((xp2>=x_b-delta)&&(xp2<x2+delta)&&(yp2<y_tMin)){
+            y_tMin = yp2;
+          }
+        }
+      }
+    }
+    y_av = 0.5*(y_tMin+y_tMax);
+    theta = atan2((x_c-x_b),(y_c-y_av));
+
+    x_tip = x_c + r_c*sin(theta);
+    y_tip = y_c + r_c*cos(theta);
+    flag = 1;
+  }
   //fprintf(ferr, "xTip %3.2e, YTip %g\n", x_tip, yMin);
   //return 1;
 
