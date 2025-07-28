@@ -1,4 +1,4 @@
-/* Title: tracking the tip displacement and velocity
+/* Title: tracking the tip displacement and velocity-v1
 # Author: Saumili Jana
 # jsaumili@gmail.com
 # Date: 17-04-2025
@@ -59,7 +59,7 @@ int main(int a, char const *arguments[]){
   double uTip = 0, vTip = 0;
   double x_tip = 0;
   double y_tip = 0;
-  double f_thresh = 1e-6;
+  double f_thresh = threshold;
 
   foreach(){
     if ((f[] > f_thresh) && (f[] < 1. - f_thresh) && (d[] == MainPhase)){
