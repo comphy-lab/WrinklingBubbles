@@ -25,6 +25,7 @@ char filename[80], NameOutput[80];//inut file and file with output respetively
 float Oh, k;
 bool flag = 0; //flag is 1 when (x_tip,y_tip) is assigned - to avoid multiple assignment
 bool flip = 0;
+char class = 'R';
 int main(int a, char const *arguments[]){
   sprintf(filename, "%s", arguments[1]);
   sprintf(NameOutput, "%s", arguments[2]);
@@ -70,7 +71,6 @@ int main(int a, char const *arguments[]){
   double yMin = HUGE;
   double xMax = -HUGE;
   double yMax = -HUGE;
-  double uTip = 0, vTip = 0;
   double x_tip = 0;
   double y_tip = 0;
   double f_thresh = threshold;
@@ -114,6 +114,7 @@ int main(int a, char const *arguments[]){
     x_tip = x2;
     y_tip = y2;
     flag = 1;
+    class = 'C';
   }
 
   //track (x3,y3)
@@ -209,6 +210,7 @@ int main(int a, char const *arguments[]){
     y_tip = y_c + r_c*cos(theta);
     flag = 1;
   }
+  if (flip ==1){class = 'F';} 
   //fprintf(ferr, "xTip %3.2e, YTip %g\n", x_tip, yMin);
   //return 1;
 
@@ -217,12 +219,12 @@ int main(int a, char const *arguments[]){
   restore (file = filename);
 
   if (t == 0){
-    fprintf(ferr, "t x1 y1 x2 y2 x3 y3 x_tip y_tip r_2c r_3c x_t\n");
-    fprintf(fp, "t x1 y1 x2 y2 x3 y3 x_tip y_tip r_2c r_3c x_t\n");    
+    fprintf(ferr, "t x1 y1 x2 y2 x3 y3 x_tip y_tip r_2c r_3c class\n");
+    fprintf(fp, "t x1 y1 x2 y2 x3 y3 x_tip y_tip r_2c r_3c class\n");    
   }
   
-  fprintf(ferr, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e\n",t, x1, y1, x2, y2, x3, y3, x_tip, y_tip, r_2c, r_3c, x_t);
-  fprintf(fp, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e\n", t, x1, y1, x2, y2, x3, y3, x_tip, y_tip, r_2c, r_3c, x_t);
+  fprintf(ferr, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %c\n",t, x1, y1, x2, y2, x3, y3, x_tip, y_tip, r_2c, r_3c, class);
+  fprintf(fp, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %c\n", t, x1, y1, x2, y2, x3, y3, x_tip, y_tip, r_2c, r_3c, class);
   fclose(fp);
 
 }
