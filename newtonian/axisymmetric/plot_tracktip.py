@@ -74,7 +74,7 @@ plt.ylabel(r'$r/R$')
 #plt.savefig('rvst.png')
 plt.legend(loc='upper left', bbox_to_anchor=(1, 1), frameon=True)
 plt.ylim(None, 1)
-plt.savefig('Zvst.pdf', bbox_inches='tight')
+plt.savefig('Rvst.pdf', bbox_inches='tight')
 #plt.show()
 plt.clf()
 
