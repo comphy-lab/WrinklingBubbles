@@ -1,0 +1,8 @@
+#!/bin/bash
+
+Oh="0.01"
+k="20"
+
+qcc -Wall -O2 -disable dimensions track_tip.c -o track_tip -lm
+python3 track_tip.py $Oh $k
+python3 plot_tracktip.py 
