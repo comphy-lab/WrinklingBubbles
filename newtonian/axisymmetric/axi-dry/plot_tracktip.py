@@ -97,7 +97,7 @@ intercept = coeffs[1]
 y_fit_line = slope * x + intercept  # Plot fit over the full x range
 plt.plot(x, y, 'r--', linewidth=1.5)
 plt.plot(x, y, 'ro', mec='black', markersize=8, markeredgewidth=1, label="film tip")
-plt.plot(x, y_fit, 'k-', linewidth=2, label=f"Best fit (slope={slope:.3g})")
+plt.plot(x, y_fit_line, 'k-', linewidth=2, label=f"Best fit (slope={slope:.3g})")
 plt.xlabel(r"$t/t_c$")
 plt.ylabel(r'$(\Delta\phi)/\pi$')
 plt.legend()
