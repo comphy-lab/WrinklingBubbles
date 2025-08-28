@@ -106,6 +106,10 @@ plt.clf()
 ang_vel = slope*np.pi
 print(f"Slope of best fit line: {slope:.6f}")
 print(f"average angular velocity: {ang_vel:.6f}")
+# Save outputs to a file
+with open("omega.txt", "w") as f:
+    f.write(f"Slope of best fit line: {slope:.6f}\n")
+    f.write(f"average angular velocity: {ang_vel:.6f}\n")
 
 
 
@@ -186,3 +190,4 @@ plt.xlabel(r"$t/t_c$")
 plt.ylabel(r'$\omega$')
 plt.savefig('omegavst.pdf', bbox_inches='tight')
 plt.clf()
+
