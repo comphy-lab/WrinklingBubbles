@@ -84,12 +84,17 @@ plt.clf()
 df1["delphi"] = df1["phi"] - df1["phi"][0]
 x = df1["t"]
 y = df1["delphi"] / np.pi
-# Best fit line (1st degree polynomial)
-coeffs = np.polyfit(x, y, 1)
+
+# Exclude the first and last N points for fitting
+N = 3  # You can adjust this number as needed
+x_fit = x[N:-N]
+y_fit = y[N:-N]
+
+# Best fit line (1st degree polynomial) on the trimmed data
+coeffs = np.polyfit(x_fit, y_fit, 1)
 slope = coeffs[0]
 intercept = coeffs[1]
-y_fit = slope * x + intercept
-
+y_fit_line = slope * x + intercept  # Plot fit over the full x range
 plt.plot(x, y, 'r--', linewidth=1.5)
 plt.plot(x, y, 'ro', mec='black', markersize=8, markeredgewidth=1, label="film tip")
 plt.plot(x, y_fit, 'k-', linewidth=2, label=f"Best fit (slope={slope:.3g})")
