@@ -2,13 +2,16 @@
 # Author: Saumili Jana
 # jsaumili@gmail.com
 # Date: 24-07-2025
-*/
 
+ * Last update: Aug 28, 2025, Saumili
+ * Changelog: added tracking angular position of tip
+*/
 /* Nomenclature:
 *(x1,y1): topmost point of the liquid film
 *(x2,y2): radially innermost point of the liquid film
 *(x3, y3): 
 *(x_tip, y_tip): coordinates of the film tip
+*phi : angle made by the tip with the x-axis/vertical axis
 */
 
 
@@ -18,6 +21,9 @@
 #include "fractions.h"
 #include "tag.h"
 #include "heights.h"
+
+#define Xcent (0.0)
+#define Ycent (0.0)
 
 scalar f[], * interfaces = {f};
 double vel;
@@ -76,6 +82,7 @@ int main(int a, char const *arguments[]){
   double f_thresh = threshold;
 
   double x1 = 0, y1 = 0, x2 = 0, y2 = 0, x3 = 0, y3 = 0;
+  double phi;
 
 
   foreach(){
@@ -210,7 +217,11 @@ int main(int a, char const *arguments[]){
     y_tip = y_c + r_c*cos(theta);
     flag = 1;
   }
-  if (flip ==1){class = 'F';} 
+  if (flip ==1){class = 'F';}
+
+  phi = atan2(y_tip, x_tip);
+
+
   //fprintf(ferr, "xTip %3.2e, YTip %g\n", x_tip, yMin);
   //return 1;
 
@@ -219,12 +230,12 @@ int main(int a, char const *arguments[]){
   restore (file = filename);
 
   if (t == 0){
-    fprintf(ferr, "t x1 y1 x2 y2 x3 y3 x_tip y_tip r_2c r_3c class\n");
-    fprintf(fp, "t x1 y1 x2 y2 x3 y3 x_tip y_tip r_2c r_3c class\n");    
+    fprintf(ferr, "t x1 y1 x2 y2 x3 y3 x_tip y_tip r_2c r_3c phi class\n");
+    fprintf(fp, "t x1 y1 x2 y2 x3 y3 x_tip y_tip r_2c r_3c phi class\n");    
   }
   
-  fprintf(ferr, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %c\n",t, x1, y1, x2, y2, x3, y3, x_tip, y_tip, r_2c, r_3c, class);
-  fprintf(fp, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %c\n", t, x1, y1, x2, y2, x3, y3, x_tip, y_tip, r_2c, r_3c, class);
+  fprintf(ferr, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %c\n",t, x1, y1, x2, y2, x3, y3, x_tip, y_tip, r_2c, r_3c, phi, class);
+  fprintf(fp, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %c\n", t, x1, y1, x2, y2, x3, y3, x_tip, y_tip, r_2c, r_3c, phi, class);
   fclose(fp);
 
 }

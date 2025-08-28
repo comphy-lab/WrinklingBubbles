@@ -78,6 +78,32 @@ plt.savefig('Rvst.pdf', bbox_inches='tight')
 #plt.show()
 plt.clf()
 
+
+
+#plot angular position wrt vertical
+df1["delphi"] = df1["phi"] - df1["phi"][0]
+x = df1["t"]
+y = df1["delphi"] / np.pi
+# Best fit line (1st degree polynomial)
+coeffs = np.polyfit(x, y, 1)
+slope = coeffs[0]
+intercept = coeffs[1]
+y_fit = slope * x + intercept
+
+plt.plot(x, y, 'r--', linewidth=1.5)
+plt.plot(x, y, 'ro', mec='black', markersize=8, markeredgewidth=1, label="film tip")
+plt.plot(x, y_fit, 'k-', linewidth=2, label=f"Best fit (slope={slope:.3g})")
+plt.xlabel(r"$t/t_c$")
+plt.ylabel(r'$(\Delta\phi)/\pi$')
+plt.legend()
+plt.savefig('delphivst.pdf', bbox_inches='tight')
+plt.clf()
+ang_vel = slope*np.pi
+print(f"Slope of best fit line: {slope:.6f}")
+print(f"average angular velocity: {ang_vel:.6f}")
+
+
+
 ##get tip velocity;
 df1["u1"] = 0.0
 df1["v1"] = 0.0
@@ -85,6 +111,7 @@ df1["u2"] = 0.0
 df1["v2"] = 0.0
 df1["u_tip"] = 0.0
 df1["v_tip"] = 0.0
+df1["omega"] = 0.0#get angular velocity with time
 for i in range(1,len(df1)-1, 1):
     df1.loc[i, "u1"] = 0.5*(((df1.loc[i, "x1"]-df1.loc[i-1, "x1"])/(df1.loc[i, "t"]-df1.loc[i-1, "t"])) + ((df1.loc[i+1, "x1"]-df1.loc[i, "x1"])/(df1.loc[i+1, "t"]-df1.loc[i, "t"])))
     df1.loc[i, "v1"] = 0.5*(((df1.loc[i, "y1"]-df1.loc[i-1, "y1"])/(df1.loc[i, "t"]-df1.loc[i-1, "t"])) + ((df1.loc[i+1, "y1"]-df1.loc[i, "y1"])/(df1.loc[i+1, "t"]-df1.loc[i, "t"])))
@@ -92,11 +119,12 @@ for i in range(1,len(df1)-1, 1):
     df1.loc[i, "v2"] = 0.5*(((df1.loc[i, "y2"]-df1.loc[i-1, "y2"])/(df1.loc[i, "t"]-df1.loc[i-1, "t"])) + ((df1.loc[i+1, "y2"]-df1.loc[i, "y2"])/(df1.loc[i+1, "t"]-df1.loc[i, "t"])))
     df1.loc[i, "u_tip"] = 0.5*(((df1.loc[i, "x_tip"]-df1.loc[i-1, "x_tip"])/(df1.loc[i, "t"]-df1.loc[i-1, "t"])) + ((df1.loc[i+1, "x_tip"]-df1.loc[i, "x_tip"])/(df1.loc[i+1, "t"]-df1.loc[i, "t"])))
     df1.loc[i, "v_tip"] = 0.5*(((df1.loc[i, "y_tip"]-df1.loc[i-1, "y_tip"])/(df1.loc[i, "t"]-df1.loc[i-1, "t"])) + ((df1.loc[i+1, "y_tip"]-df1.loc[i, "y_tip"])/(df1.loc[i+1, "t"]-df1.loc[i, "t"])))
-
+    df1.loc[i, "omega"] = 0.5*(((df1.loc[i, "delphi"]-df1.loc[i-1, "delphi"])/(df1.loc[i, "t"]-df1.loc[i-1, "t"])) + ((df1.loc[i+1, "delphi"]-df1.loc[i, "delphi"])/(df1.loc[i+1, "t"]-df1.loc[i, "t"])))
+   # df1.loc[i, "omega"] = ((df1.loc[i, "delphi"]-df1.loc[i-1, "delphi"])/(df1.loc[i, "t"]-df1.loc[i-1, "t"]))
 df1["v1_mag"] =  np.sqrt(df1["u1"]**2 + df1["v1"]**2)
 df1["v2_mag"] =  np.sqrt(df1["u2"]**2 + df1["v2"]**2)
 df1["vTip_mag"] =  np.sqrt(df1["u_tip"]**2 + df1["v_tip"]**2)
-
+df1["omega_avg"] = df1["omega"].rolling(window=5, center=True).mean()
 #print(df1)#debug
 ##Plot velocities-u comp
 df2 = df1.iloc[:-1]
@@ -143,4 +171,13 @@ plt.legend(loc='upper left', bbox_to_anchor=(1, 1), frameon=True)
 #plt.ylim(None, 1)
 plt.savefig('vmagvst.pdf', bbox_inches='tight')
 #plt.show()
+plt.clf()
+#angular velocity with time
+#plt.plot(df2["t"], df2["omega"], 'r--', linewidth = "1.5")
+plt.plot(df2["t"], df2["omega"], 'ro', mec = 'black',  markersize=8, markeredgewidth = 1,label="film tip")
+plt.plot(df2["t"], df2["omega_avg"], 'k-', linewidth = 2, label="omega (moving avg)")
+#plt.legend()
+plt.xlabel(r"$t/t_c$")
+plt.ylabel(r'$\omega$')
+plt.savefig('omegavst.pdf', bbox_inches='tight')
 plt.clf()
