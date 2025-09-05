@@ -9,6 +9,7 @@ import sys
 
 Oh = float(sys.argv[1])
 k = float(sys.argv[2])
+tsnap = float(sys.argv[3])
 nGFS = 1000
 name = "track_tip.dat"
 
@@ -16,7 +17,7 @@ name = "track_tip.dat"
 if os.path.exists(name):
     print("File %s found! New data will be appended to the file" % name)
 for ti in range(nGFS):
-    t = 0.010 * ti
+    t = tsnap * ti
     place = "intermediate/snapshot-%5.4f" % t
     if not os.path.exists(place):
         print("File %s not found!" % place)

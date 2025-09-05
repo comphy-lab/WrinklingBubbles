@@ -9,6 +9,9 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import pandas as pd
 
+Oh = float(sys.argv[1])
+k = float(sys.argv[2])
+
 FigureWidth = 3.375
 factor = 1.5
 # Set global parameters
@@ -110,8 +113,8 @@ print(f"average angular velocity: {ang_vel:.6f}")
 with open("omega.txt", "w") as f:
     f.write(f"Slope of best fit line: {slope:.6f}\n")
     f.write(f"average angular velocity: {ang_vel:.6f}\n")
-
-
+with open("../k_omega.dat", "a") as f:
+    f.write(f"{Oh} {k} {ang_vel:.6f}\n")
 
 ##get tip velocity;
 df1["u1"] = 0.0
