@@ -5,16 +5,20 @@
 
  * Last update: Aug 28, 2025, Saumili
  * Changelog: added tracking angular position of tip
+ * 
+ *  Last update: Sep 30, 2025, Saumili
+ * Changelog: tracking tip velocities
 */
 /* Nomenclature:
 *(x1,y1): topmost point of the liquid film
 *(x2,y2): radially innermost point of the liquid film
 *(x3, y3): 
 *(x_tip, y_tip): coordinates of the film tip
+*(uTip, vTip): velocity components of tip
+*velTip: net velocity magnitude of the tip
 *phi : angle made by the tip with the x-axis/vertical axis
 *r_tip: postition vector of the tip wrt the initial centre
 */
-
 
 //f: 1 is liq, 0 is gas phase
 #include "axi.h" //remove for 3d case
@@ -83,7 +87,7 @@ int main(int a, char const *arguments[]){
   double f_thresh = threshold;
 
   double x1 = 0, y1 = 0, x2 = 0, y2 = 0, x3 = 0, y3 = 0;
-  double phi, r_tip;
+  double phi, r_tip, uTip, vTip, velTip;
 
 
   foreach(){
@@ -222,6 +226,10 @@ int main(int a, char const *arguments[]){
 
   phi = atan2(y_tip, x_tip);
   r_tip = sqrt(sq(x_tip-Xcent)+sq(y_tip-Ycent));
+  uTip = interpolate(u.x, x_tip, y_tip);//x-component of tip velocity
+  vTip = interpolate(u.y, x_tip, y_tip);//y-component of tip velocity
+  velTip = sqrt(sq(uTip)+sq(vTip)); //net magnitude of tip velocity
+  
 
 
 
@@ -233,12 +241,12 @@ int main(int a, char const *arguments[]){
   restore (file = filename);
 
   if (t == 0){
-    fprintf(ferr, "t x1 y1 x2 y2 x3 y3 x_tip y_tip r_2c r_3c phi r_tip class\n");
-    fprintf(fp, "t x1 y1 x2 y2 x3 y3 x_tip y_tip r_2c r_3c phi r_tip class\n");    
+    fprintf(ferr, "t x1 y1 x2 y2 x3 y3 x_tip y_tip r_2c r_3c phi r_tip uTip vTip velTip class\n");
+    fprintf(fp, "t x1 y1 x2 y2 x3 y3 x_tip y_tip r_2c r_3c phi r_tip uTip vTip velTip class\n");    
   }
   
-  fprintf(ferr, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %c\n",t, x1, y1, x2, y2, x3, y3, x_tip, y_tip, r_2c, r_3c, phi, r_tip, class);
-  fprintf(fp, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %c\n", t, x1, y1, x2, y2, x3, y3, x_tip, y_tip, r_2c, r_3c, phi, r_tip, class);
+  fprintf(ferr, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %c\n",t, x1, y1, x2, y2, x3, y3, x_tip, y_tip, r_2c, r_3c, phi, r_tip, uTip, vTip, velTip, class);
+  fprintf(fp, "%6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %6.5e %c\n", t, x1, y1, x2, y2, x3, y3, x_tip, y_tip, r_2c, r_3c, phi, r_tip, uTip, vTip, velTip, class);
   fclose(fp);
 
 }
